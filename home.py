@@ -41,6 +41,11 @@ def t(key):
 if 'lang' not in st.session_state:
     st.session_state.lang = 'zh'
 
+st.title(t('title'))
+st.caption(t('subtitle'))
+st.divider()
+st.subheader(t('intro'))
+
 cards = t('cards')
 
 col1, col2, col3, col4 = st.columns(4)
