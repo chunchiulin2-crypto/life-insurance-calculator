@@ -1,11 +1,14 @@
-"""定期寿险保费计算器 · Web UI  /  Term Life Premium Calculator"""
+"""寿险精算计算器 · Web UI  /  Life Insurance Actuarial Calculator"""
 
 import streamlit as st
 import pandas as pd
 import os
 from mortality import load_table, build_life_table
-from premium import single_premium, annual_premium
-from reserve import reserve_table
+from premium import (single_premium, annual_premium,
+                     whole_life_single_premium, whole_life_annual_premium,
+                     endowment_single_premium, endowment_annual_premium,
+                     annuity_price)
+from reserve import reserve_table, whole_life_reserve_table, endowment_reserve_table
 
 DATA_PATH = os.path.join(os.path.dirname(__file__), 'data', 'clt_2010_2013.csv')
 
@@ -13,12 +16,18 @@ DATA_PATH = os.path.join(os.path.dirname(__file__), 'data', 'clt_2010_2013.csv')
 T = {
     'zh': {
         'page_title': '寿险保费计算器',
-        'title': '定期寿险保费计算器',
-        'caption': 'CLT 2010-2013 生命表（非养老类）· 趸缴/年缴纯保费 · 责任准备金',
+        'title': '寿险精算计算器',
+        'caption': 'CLT 2010-2013 生命表 · 定期/终身/年金/两全',
         'lang_label': '语言 / Language',
+        'product_label': '产品类型',
+        'product_term': '定期寿险',
+        'product_whole_life': '终身寿险',
+        'product_annuity': '生存年金',
+        'product_endowment': '两全保险',
         'params_header': '投保参数',
         'age': '投保年龄',
         'sum_insured': '保险金额（元）',
+        'annual_payment': '年领金额（元）',
         'term': '保险期限（年）',
         'rate': '预定利率（%）',
         'gender': '性别',
@@ -27,22 +36,34 @@ T = {
         'error_age_term': '年龄 + 期限 ({age}+{term}={total}) 超过极限年龄 105',
         'single_premium': '趸缴纯保费',
         'single_premium_help': '一次性缴清的纯保费',
+        'annuity_price_label': '趸缴购买价格',
+        'annuity_price_help': '一次性购买该年金的价格',
         'annual_premium': '年缴纯保费',
         'annual_premium_help': '每年初缴纳的均衡纯保费',
         'reserve_chart': '责任准备金曲线',
         'reserve_table': '各年末准备金明细',
         'col_year': '保单年度',
         'col_reserve': '准备金（元）',
-        'footer': '被保险人：{age} 岁 {gender} · 保额 ¥{sum:,} · 期限 {term} 年 · 利率 {rate:.1%} · 生命表 CLT 2010-2013',
+        'annuity_note': '生存年金无责任准备金',
+        'footer_term': '被保险人：{age} 岁 {gender} · 保额 ¥{sum:,} · 期限 {term} 年 · 利率 {rate:.1%}',
+        'footer_wl': '被保险人：{age} 岁 {gender} · 保额 ¥{sum:,} · 终身 · 利率 {rate:.1%}',
+        'footer_annuity': '被保险人：{age} 岁 {gender} · 年领 ¥{sum:,} · 期限 {term} 年 · 利率 {rate:.1%}',
+        'footer_endow': '被保险人：{age} 岁 {gender} · 保额 ¥{sum:,} · 期限 {term} 年 · 利率 {rate:.1%} · 到期返还',
     },
     'en': {
         'page_title': 'Life Insurance Calculator',
-        'title': 'Term Life Insurance Calculator',
-        'caption': 'CLT 2010-2013 Mortality Table (Non-Pension) · Net Premiums · Policy Reserves',
+        'title': 'Life Insurance Actuarial Calculator',
+        'caption': 'CLT 2010-2013 Table · Term / Whole Life / Annuity / Endowment',
         'lang_label': '语言 / Language',
+        'product_label': 'Product Type',
+        'product_term': 'Term Life',
+        'product_whole_life': 'Whole Life',
+        'product_annuity': 'Life Annuity',
+        'product_endowment': 'Endowment',
         'params_header': 'Policy Parameters',
         'age': 'Issue Age',
         'sum_insured': 'Sum Insured (¥)',
+        'annual_payment': 'Annual Payment (¥)',
         'term': 'Policy Term (years)',
         'rate': 'Interest Rate (%)',
         'gender': 'Gender',
@@ -51,19 +72,24 @@ T = {
         'error_age_term': 'Age + Term ({age}+{term}={total}) exceeds limit age 105',
         'single_premium': 'Net Single Premium',
         'single_premium_help': 'One-time lump-sum premium',
+        'annuity_price_label': 'Purchase Price',
+        'annuity_price_help': 'Lump-sum price to buy this annuity',
         'annual_premium': 'Net Annual Premium',
         'annual_premium_help': 'Level premium paid at beginning of each year',
         'reserve_chart': 'Policy Reserve Curve',
         'reserve_table': 'Reserve by Policy Year',
         'col_year': 'Policy Year',
         'col_reserve': 'Reserve (¥)',
-        'footer': 'Insured: Age {age} {gender} · Sum Insured ¥{sum:,} · Term {term} yrs · Rate {rate:.1%} · CLT 2010-2013',
+        'annuity_note': 'Life annuities have no policy reserves',
+        'footer_term': 'Insured: Age {age} {gender} · Sum Insured ¥{sum:,} · Term {term} yrs · Rate {rate:.1%}',
+        'footer_wl': 'Insured: Age {age} {gender} · Sum Insured ¥{sum:,} · Whole Life · Rate {rate:.1%}',
+        'footer_annuity': 'Insured: Age {age} {gender} · Annual ¥{sum:,} · Term {term} yrs · Rate {rate:.1%}',
+        'footer_endow': 'Insured: Age {age} {gender} · Sum Insured ¥{sum:,} · Term {term} yrs · Rate {rate:.1%} · Endowment',
     },
 }
 
 
 def t(key, **kwargs):
-    """Translate key to current language, with optional format kwargs."""
     text = T[st.session_state.lang][key]
     if kwargs:
         text = text.format(**kwargs)
@@ -80,7 +106,7 @@ st.set_page_config(
     layout='wide',
 )
 
-# ---- Language Switcher (top of sidebar) ----
+# ---- Sidebar ----
 lang = st.sidebar.selectbox(
     t('lang_label'),
     ['中文', 'English'],
@@ -92,6 +118,12 @@ if new_lang != st.session_state.lang:
     st.session_state.lang = new_lang
     st.rerun()
 
+# Product selector
+product = st.sidebar.selectbox(
+    t('product_label'),
+    [t('product_term'), t('product_whole_life'), t('product_annuity'), t('product_endowment')],
+)
+
 # ---- Header ----
 st.title(t('title'))
 st.caption(t('caption'))
@@ -100,10 +132,22 @@ st.caption(t('caption'))
 st.sidebar.header(t('params_header'))
 
 age = st.sidebar.slider(t('age'), min_value=0, max_value=80, value=30, step=1)
-sum_insured = st.sidebar.number_input(t('sum_insured'), min_value=10000, value=1000000, step=10000, format='%d')
-term = st.sidebar.slider(t('term'), min_value=1, max_value=50, value=20, step=1)
+
+# Adaptive: annuity shows "annual payment", others show "sum insured"
+if product == t('product_annuity'):
+    sum_insured = st.sidebar.number_input(t('annual_payment'), min_value=1000, value=50000, step=1000, format='%d')
+else:
+    sum_insured = st.sidebar.number_input(t('sum_insured'), min_value=10000, value=1000000, step=10000, format='%d')
+
+# Adaptive: whole life hides term (auto = 105 - age)
+if product != t('product_whole_life'):
+    term = st.sidebar.slider(t('term'), min_value=1, max_value=50, value=20, step=1)
+else:
+    term = 105 - age  # implicit
+
 rate_pct = st.sidebar.slider(t('rate'), min_value=0.0, max_value=10.0, value=3.5, step=0.5)
 rate = rate_pct / 100
+
 gender_label = st.sidebar.radio(
     t('gender'),
     [t('gender_male'), t('gender_female')],
@@ -112,7 +156,7 @@ gender_label = st.sidebar.radio(
 gender_code = 'M' if gender_label == t('gender_male') else 'F'
 
 # Validate
-if age + term > 105:
+if product != t('product_whole_life') and age + term > 105:
     st.sidebar.error(t('error_age_term', age=age, term=term, total=age + term))
     st.stop()
 
@@ -123,30 +167,53 @@ def get_life_table(gender_code):
     return build_life_table(df, gender_code)
 
 lt = get_life_table(gender_code)
-sp = single_premium(lt, age, sum_insured, term, rate)
-ap = annual_premium(lt, age, sum_insured, term, rate)
-reserves = reserve_table(lt, age, sum_insured, term, rate)
+
+# Dispatch by product
+if product == t('product_whole_life'):
+    sp = whole_life_single_premium(lt, age, sum_insured, rate)
+    ap = whole_life_annual_premium(lt, age, sum_insured, rate)
+    reserves = whole_life_reserve_table(lt, age, sum_insured, rate)
+    footer_key = 'footer_wl'
+elif product == t('product_annuity'):
+    sp = annuity_price(lt, age, sum_insured, term, rate)
+    ap = None
+    reserves = []
+    footer_key = 'footer_annuity'
+elif product == t('product_endowment'):
+    sp = endowment_single_premium(lt, age, sum_insured, term, rate)
+    ap = endowment_annual_premium(lt, age, sum_insured, term, rate)
+    reserves = endowment_reserve_table(lt, age, sum_insured, term, rate)
+    footer_key = 'footer_endow'
+else:  # term
+    sp = single_premium(lt, age, sum_insured, term, rate)
+    ap = annual_premium(lt, age, sum_insured, term, rate)
+    reserves = reserve_table(lt, age, sum_insured, term, rate)
+    footer_key = 'footer_term'
 
 # ---- Main Area ----
-col1, col2 = st.columns(2)
-with col1:
-    st.metric(t('single_premium'), f'¥{sp:,.0f}', help=t('single_premium_help'))
-with col2:
-    st.metric(t('annual_premium'), f'¥{ap:,.0f}', help=t('annual_premium_help'))
+if product == t('product_annuity'):
+    st.metric(t('annuity_price_label'), f'¥{sp:,.0f}', help=t('annuity_price_help'))
+    st.caption(t('annuity_note'))
+else:
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric(t('single_premium'), f'¥{sp:,.0f}', help=t('single_premium_help'))
+    with col2:
+        st.metric(t('annual_premium'), f'¥{ap:,.0f}', help=t('annual_premium_help'))
 
-st.divider()
+    st.divider()
 
-# Reserve chart
-st.subheader(t('reserve_chart'))
-df_reserve = pd.DataFrame(reserves, columns=['Year', 'Reserve']).set_index('Year')
-st.line_chart(df_reserve, height=300)
+    # Reserve chart
+    st.subheader(t('reserve_chart'))
+    df_reserve = pd.DataFrame(reserves, columns=['Year', 'Reserve']).set_index('Year')
+    st.line_chart(df_reserve, height=300)
 
-# Reserve table
-st.subheader(t('reserve_table'))
-df_display = pd.DataFrame(reserves, columns=[t('col_year'), t('col_reserve')])
-df_display[t('col_reserve')] = df_display[t('col_reserve')].apply(lambda x: f'¥{x:,.2f}')
-st.dataframe(df_display, width='stretch', hide_index=True, height=400)
+    # Reserve table
+    st.subheader(t('reserve_table'))
+    df_display = pd.DataFrame(reserves, columns=[t('col_year'), t('col_reserve')])
+    df_display[t('col_reserve')] = df_display[t('col_reserve')].apply(lambda x: f'¥{x:,.2f}')
+    st.dataframe(df_display, width='stretch', hide_index=True, height=400)
 
 # ---- Footer ----
 st.divider()
-st.caption(t('footer', age=age, gender=gender_label, sum=sum_insured, term=term, rate=rate))
+st.caption(t(footer_key, age=age, gender=gender_label, sum=sum_insured, term=term, rate=rate))
