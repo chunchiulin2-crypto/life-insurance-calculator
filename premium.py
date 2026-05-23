@@ -176,3 +176,66 @@ def annuity_price(life_table, age, annual_payment, term, rate, defer=0):
         return annual_payment * (v ** defer) * def_px * a_deferred
     a = annuity_due(life_table, age, term, rate)
     return annual_payment * a
+
+
+# ---- m-thly Payment Frequency ----
+
+
+def m_thly_annuity_factor(rate, m):
+    """Compute α(m) and β(m) for m-thly annuity-due conversion (UDD).
+
+    ä(m)x:n⌉ = α(m) × äx:n⌉ − β(m) × (1 − nEx)
+    """
+    if m == 1:
+        return 1.0, 0.0
+    i = rate
+    d = i / (1 + i)
+    im = m * ((1 + i) ** (1 / m) - 1)
+    dm = m * (1 - (1 - d) ** (1 / m))
+    alpha = (i * d) / (im * dm)
+    beta = (i - im) / (im * dm)
+    return alpha, beta
+
+
+def m_thly_annuity_due(life_table, age, term, rate, m):
+    """Compute ä(m)x:n⌉ — m-thly annuity-due."""
+    if m == 1:
+        return annuity_due(life_table, age, term, rate)
+    a_annual = annuity_due(life_table, age, term, rate)
+    alpha, beta = m_thly_annuity_factor(rate, m)
+    pe = pure_endowment(life_table, age, term, rate)
+    return alpha * a_annual - beta * (1 - pe)
+
+
+# ---- Gross Premium (α/β/γ) ----
+
+
+def gross_single_premium(life_table, age, sum_insured, term, rate,
+                         alpha=0.0, beta=0.0, gamma=0.0, claim_accel=False):
+    """Compute gross single premium with α/β/γ expense loading.
+
+    G = (net_SP + α×S + γ×S×ä) / (1 − β)
+    """
+    net_sp = single_premium(life_table, age, sum_insured, term, rate, claim_accel)
+    a = annuity_due(life_table, age, term, rate)
+    expense_pv = alpha * sum_insured + gamma * sum_insured * a
+    if beta >= 1.0:
+        return float('inf')
+    return (net_sp + expense_pv) / (1 - beta)
+
+
+def gross_annual_premium(life_table, age, sum_insured, term, rate,
+                         alpha=0.0, beta=0.0, gamma=0.0, claim_accel=False):
+    """Compute gross level annual premium with α/β/γ expense loading.
+
+    G = (Ax:n⌉×S + α×S + γ×S×äx:n⌉) / ((1−β) × äx:n⌉)
+    """
+    gsp = gross_single_premium(life_table, age, sum_insured, term, rate,
+                                alpha, beta, gamma, claim_accel)
+    a = annuity_due(life_table, age, term, rate)
+    return gsp / a if a > 0 else 0
+
+
+def periodic_premium(gross_annual, m):
+    """Convert gross annual premium to per-payment amount. P(m) = G / m."""
+    return gross_annual / m

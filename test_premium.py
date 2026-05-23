@@ -159,3 +159,54 @@ class TestAnnuity:
         p30 = annuity_price(self.lt_m, 30, 50000, 10, 0.035)
         p60 = annuity_price(self.lt_m, 60, 50000, 10, 0.035)
         assert p60 < p30  # older = fewer expected payments
+
+
+class TestMthly:
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.df = load_table(DATA_PATH)
+        self.lt_m = build_life_table(self.df, 'M')
+
+    def test_m1_equals_annual(self):
+        from premium import m_thly_annuity_due
+        a1 = m_thly_annuity_due(self.lt_m, 30, 20, 0.035, 1)
+        a = annuity_due(self.lt_m, 30, 20, 0.035)
+        assert a1 == pytest.approx(a, rel=1e-6)
+
+    def test_m12_close_to_annual(self):
+        from premium import m_thly_annuity_due
+        a12 = m_thly_annuity_due(self.lt_m, 30, 20, 0.035, 12)
+        a = annuity_due(self.lt_m, 30, 20, 0.035)
+        # m-thly and annual should be close (within ~1% for i=3.5%)
+        assert abs(a12 - a) / a < 0.02
+
+    def test_m12_positive(self):
+        from premium import m_thly_annuity_due
+        a12 = m_thly_annuity_due(self.lt_m, 30, 20, 0.035, 12)
+        assert a12 > 0
+
+
+class TestGrossPremium:
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.df = load_table(DATA_PATH)
+        self.lt_m = build_life_table(self.df, 'M')
+
+    def test_gross_equals_net_when_expenses_zero(self):
+        from premium import gross_annual_premium
+        gap = gross_annual_premium(self.lt_m, 30, 1000000, 20, 0.035, alpha=0, beta=0, gamma=0)
+        ap = annual_premium(self.lt_m, 30, 1000000, 20, 0.035)
+        assert gap == pytest.approx(ap, rel=1e-5)
+
+    def test_gross_greater_than_net(self):
+        from premium import gross_annual_premium
+        gap = gross_annual_premium(self.lt_m, 30, 1000000, 20, 0.035, alpha=0.05, beta=0.02, gamma=0.0005)
+        ap = annual_premium(self.lt_m, 30, 1000000, 20, 0.035)
+        assert gap > ap
+
+    def test_periodic_premium_monthly(self):
+        from premium import gross_annual_premium, periodic_premium
+        gap = gross_annual_premium(self.lt_m, 30, 1000000, 20, 0.035, alpha=0.05, beta=0.02, gamma=0.0005)
+        monthly = periodic_premium(gap, 12)
+        assert monthly == pytest.approx(gap / 12, rel=1e-6)
+        assert monthly * 12 == pytest.approx(gap, rel=1e-6)
