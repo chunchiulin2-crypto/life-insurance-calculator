@@ -271,3 +271,28 @@ class TestDeferredAssurance:
         ap = deferred_term_annual_premium(self.lt_m, 25, 20, 20, 1000000, 0.035)
         a = annuity_due(self.lt_m, 25, 20, 0.035)
         assert sp == pytest.approx(ap * a, rel=1e-5)
+
+
+class TestPureEndowment:
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.df = load_table(DATA_PATH)
+        self.lt_m = build_life_table(self.df, 'M')
+
+    def test_pure_endowment_positive(self):
+        from premium import pure_endowment_single_premium
+        sp = pure_endowment_single_premium(self.lt_m, 20, 1000000, 20, 0.035)
+        assert sp > 0
+
+    def test_pure_endowment_cheaper_than_endowment(self):
+        from premium import pure_endowment_single_premium, endowment_single_premium
+        sp_pure = pure_endowment_single_premium(self.lt_m, 20, 1000000, 20, 0.035)
+        sp_endow = endowment_single_premium(self.lt_m, 20, 1000000, 20, 0.035)
+        assert sp_pure < sp_endow
+
+    def test_pure_endowment_consistency(self):
+        from premium import pure_endowment_single_premium, pure_endowment_annual_premium, annuity_due
+        sp = pure_endowment_single_premium(self.lt_m, 20, 1000000, 20, 0.035)
+        ap = pure_endowment_annual_premium(self.lt_m, 20, 1000000, 20, 0.035)
+        a = annuity_due(self.lt_m, 20, 20, 0.035)
+        assert sp == pytest.approx(ap * a, rel=1e-5)

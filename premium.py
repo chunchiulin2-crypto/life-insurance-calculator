@@ -132,6 +132,25 @@ def pure_endowment(life_table, age, term, rate):
     return (v ** term) * npx
 
 
+def pure_endowment_single_premium(life_table, age, sum_insured, term, rate):
+    """Net single premium for pure endowment.
+
+    S × nEx = S × v^n × npx
+    Pays sum_insured at end of term IF alive. Nothing if die before.
+    """
+    return sum_insured * pure_endowment(life_table, age, term, rate)
+
+
+def pure_endowment_annual_premium(life_table, age, sum_insured, term, rate):
+    """Net level annual premium for pure endowment.
+
+    P = (S × nEx) / äx:n⌉
+    """
+    sp = pure_endowment_single_premium(life_table, age, sum_insured, term, rate)
+    a = annuity_due(life_table, age, term, rate)
+    return sp / a if a > 0 else 0
+
+
 def endowment_single_premium(life_table, age, sum_insured, term, rate, claim_accel=False):
     """Compute net single premium for endowment insurance.
 
