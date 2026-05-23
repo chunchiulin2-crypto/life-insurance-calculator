@@ -12,8 +12,8 @@ AM92_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'am92.csv')
 T = {
     'zh': {
         'title': '递延终身年金 · Deferred Annuity',
-        'caption': '先缴费 · 后领钱 · 活多久领多久',,
-        'table_label': '生命表',
+        'caption': '先缴费 · 后领钱 · 活多久领多久',
+        'table_label': 'Life Table',
         'table_clt': 'CLT 2010-2013',
         'table_am92ult': 'AM92 Ultimate',
         'table_am92sel': 'AM92 Select',
@@ -38,8 +38,8 @@ T = {
     },
     'en': {
         'title': 'Deferred Life Annuity',
-        'caption': 'Pay now · Receive later · For life',,
-        'table_label': '生命表',
+        'caption': 'Pay now · Receive later · For life',
+        'table_label': 'Life Table',
         'table_clt': 'CLT 2010-2013',
         'table_am92ult': 'AM92 Ultimate',
         'table_am92sel': 'AM92 Select',

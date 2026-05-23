@@ -14,8 +14,8 @@ DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'clt_2010_2013
 T = {
     'zh': {
         'title': '定期寿险 · Term Life',
-        'caption': '约定期限内死亡赔付 · Net Single & Annual Premiums · Policy Reserves',,
-        'table_label': '生命表',
+        'caption': '约定期限内死亡赔付 · Net Single & Annual Premiums · Policy Reserves',
+        'table_label': 'Life Table',
         'table_clt': 'CLT 2010-2013',
         'table_am92ult': 'AM92 Ultimate',
         'table_am92sel': 'AM92 Select',
@@ -46,12 +46,7 @@ T = {
     },
     'en': {
         'title': 'Term Life Insurance',
-        'caption': 'Death benefit within a fixed term · Net Premiums · Reserves',,
-        'table_label': '生命表',
-        'table_clt': 'CLT 2010-2013',
-        'table_am92ult': 'AM92 Ultimate',
-        'table_am92sel': 'AM92 Select',
-        'table_am92sel_plusone': 'AM92 Select+1',,
+        'caption': 'Death benefit within a fixed term · Net Premiums · Reserves',
         'table_label': 'Life Table',
         'table_clt': 'CLT 2010-2013',
         'table_am92ult': 'AM92 Ultimate',

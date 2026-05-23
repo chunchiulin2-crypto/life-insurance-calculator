@@ -14,8 +14,8 @@ DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'clt_2010_2013
 T = {
     'zh': {
         'title': '两全保险 · Endowment',
-        'caption': '死亡赔钱 + 到期生存返还 · 保障 + 储蓄',,
-        'table_label': '生命表',
+        'caption': '死亡赔钱 + 到期生存返还 · 保障 + 储蓄',
+        'table_label': 'Life Table',
         'table_clt': 'CLT 2010-2013',
         'table_am92ult': 'AM92 Ultimate',
         'table_am92sel': 'AM92 Select',
@@ -47,12 +47,7 @@ T = {
     },
     'en': {
         'title': 'Endowment Insurance',
-        'caption': 'Death benefit + survival benefit at maturity · Protection + Savings',,
-        'table_label': '生命表',
-        'table_clt': 'CLT 2010-2013',
-        'table_am92ult': 'AM92 Ultimate',
-        'table_am92sel': 'AM92 Select',
-        'table_am92sel_plusone': 'AM92 Select+1',,
+        'caption': 'Death benefit + survival benefit at maturity · Protection + Savings',
         'table_label': 'Life Table',
         'table_clt': 'CLT 2010-2013',
         'table_am92ult': 'AM92 Ultimate',

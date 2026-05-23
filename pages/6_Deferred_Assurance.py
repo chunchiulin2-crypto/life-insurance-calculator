@@ -16,8 +16,8 @@ DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'clt_2010_2013
 T = {
     'zh': {
         'title': '递延寿险 · Deferred Assurance',
-        'caption': '先缴费 · 后保障 · 递延期内死亡不赔付',,
-        'table_label': '生命表',
+        'caption': '先缴费 · 后保障 · 递延期内死亡不赔付',
+        'table_label': 'Life Table',
         'table_clt': 'CLT 2010-2013',
         'table_am92ult': 'AM92 Ultimate',
         'table_am92sel': 'AM92 Select',
@@ -46,8 +46,8 @@ T = {
     },
     'en': {
         'title': 'Deferred Life Assurance',
-        'caption': 'Pay now · Covered later · No benefit if death during deferment',,
-        'table_label': '生命表',
+        'caption': 'Pay now · Covered later · No benefit if death during deferment',
+        'table_label': 'Life Table',
         'table_clt': 'CLT 2010-2013',
         'table_am92ult': 'AM92 Ultimate',
         'table_am92sel': 'AM92 Select',

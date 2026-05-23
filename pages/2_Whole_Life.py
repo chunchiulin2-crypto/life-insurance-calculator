@@ -14,8 +14,8 @@ DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'clt_2010_2013
 T = {
     'zh': {
         'title': '终身寿险 · Whole Life',
-        'caption': '保障终身 · 无论何时死亡都赔付 · 准备金单调递增至保额',,
-        'table_label': '生命表',
+        'caption': '保障终身 · 无论何时死亡都赔付 · 准备金单调递增至保额',
+        'table_label': 'Life Table',
         'table_clt': 'CLT 2010-2013',
         'table_am92ult': 'AM92 Ultimate',
         'table_am92sel': 'AM92 Select',
@@ -47,12 +47,7 @@ T = {
     },
     'en': {
         'title': 'Whole Life Insurance',
-        'caption': 'Lifetime coverage · Pays on death whenever it occurs · Reserve approaches sum insured',,
-        'table_label': '生命表',
-        'table_clt': 'CLT 2010-2013',
-        'table_am92ult': 'AM92 Ultimate',
-        'table_am92sel': 'AM92 Select',
-        'table_am92sel_plusone': 'AM92 Select+1',,
+        'caption': 'Lifetime coverage · Pays on death whenever it occurs · Reserve approaches sum insured',
         'table_label': 'Life Table',
         'table_clt': 'CLT 2010-2013',
         'table_am92ult': 'AM92 Ultimate',

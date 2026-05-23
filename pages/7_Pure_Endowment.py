@@ -11,8 +11,8 @@ AM92_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'am92.csv')
 T = {
     'zh': {
         'title': '纯生存保险 · Pure Endowment',
-        'caption': '活到约定年龄 → 拿钱 · 中途死亡 → 不赔付',,
-        'table_label': '生命表',
+        'caption': '活到约定年龄 → 拿钱 · 中途死亡 → 不赔付',
+        'table_label': 'Life Table',
         'table_clt': 'CLT 2010-2013',
         'table_am92ult': 'AM92 Ultimate',
         'table_am92sel': 'AM92 Select',
@@ -32,8 +32,8 @@ T = {
     },
     'en': {
         'title': 'Pure Endowment',
-        'caption': 'Survive to maturity → receive lump sum · Die before → nothing',,
-        'table_label': '生命表',
+        'caption': 'Survive to maturity → receive lump sum · Die before → nothing',
+        'table_label': 'Life Table',
         'table_clt': 'CLT 2010-2013',
         'table_am92ult': 'AM92 Ultimate',
         'table_am92sel': 'AM92 Select',

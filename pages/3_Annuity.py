@@ -11,8 +11,8 @@ AM92_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'am92.csv')
 T = {
     'zh': {
         'title': '生存年金 · Life Annuity',
-        'caption': '活着每年领钱 · 趸缴购买价格 = 年领金额 × äx:n⌉',,
-        'table_label': '生命表',
+        'caption': '活着每年领钱 · 趸缴购买价格 = 年领金额 × äx:n⌉',
+        'table_label': 'Life Table',
         'table_clt': 'CLT 2010-2013',
         'table_am92ult': 'AM92 Ultimate',
         'table_am92sel': 'AM92 Select',
@@ -28,12 +28,7 @@ T = {
     },
     'en': {
         'title': 'Life Annuity',
-        'caption': 'Periodic payments while alive · Purchase Price = Annual Payment × äx:n⌉',,
-        'table_label': '生命表',
-        'table_clt': 'CLT 2010-2013',
-        'table_am92ult': 'AM92 Ultimate',
-        'table_am92sel': 'AM92 Select',
-        'table_am92sel_plusone': 'AM92 Select+1',,
+        'caption': 'Periodic payments while alive · Purchase Price = Annual Payment × äx:n⌉',
         'table_label': 'Life Table',
         'table_clt': 'CLT 2010-2013',
         'table_am92ult': 'AM92 Ultimate',
