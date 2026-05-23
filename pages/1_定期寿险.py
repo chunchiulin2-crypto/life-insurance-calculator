@@ -21,8 +21,14 @@ T = {
         'payment_label': '赔付时点',
         'pay_eoy': '死亡年末付款', 'pay_imm': '死亡立即付款 (UDD)',
         'pay_hint': '立即付款 = (1+i)^0.5 × 年末付款',
-        'sp': '趸缴纯保费', 'sp_help': '一次性缴清的纯保费',
-        'ap': '年缴纯保费', 'ap_help': '每年初缴纳的均衡纯保费',
+        'expense_alpha': 'α 获取费 (% × 保额)',
+        'expense_beta': 'β 维持费 (% × 保费)',
+        'expense_gamma': 'γ 收费费 (‰ × 保额)',
+        'expense_formula': '毛保费 = (纯保费 + 费用现值) ÷ (1 − β)',
+        'freq_label': '缴费频率',
+        'freq_annual': '年缴', 'freq_semi': '半年缴', 'freq_quarterly': '季缴', 'freq_monthly': '月缴',
+        'per_payment': '每期保费', 'gross_annual': '年毛保费',
+        'net_premium': '纯保费 (净)', 'net_premium_help': '纯风险保费',
         'reserve_chart': '责任准备金曲线', 'reserve_table': '各年末准备金明细',
         'col_year': '保单年度', 'col_reserve': '准备金',
         'footer': '{age}岁 {gender} · 保额¥{sum:,} · {term}年 · 利率{rate:.1%} · {risk} · {payment}',
@@ -38,8 +44,14 @@ T = {
         'payment_label': 'Death Benefit Timing',
         'pay_eoy': 'End of Year of Death', 'pay_imm': 'Immediate on Death (UDD)',
         'pay_hint': 'Immediate = (1+i)^0.5 × End-of-Year',
-        'sp': 'Net Single Premium', 'sp_help': 'One-time lump-sum premium',
-        'ap': 'Net Annual Premium', 'ap_help': 'Level premium paid each year-beginning',
+        'expense_alpha': 'α Acquisition (% × Sum Insured)',
+        'expense_beta': 'β Maintenance (% × Premium)',
+        'expense_gamma': 'γ Collection (‰ × Sum Insured)',
+        'expense_formula': 'Gross = (Net + Expense PV) ÷ (1 − β)',
+        'freq_label': 'Payment Frequency',
+        'freq_annual': 'Annual', 'freq_semi': 'Semi-annual', 'freq_quarterly': 'Quarterly', 'freq_monthly': 'Monthly',
+        'per_payment': 'Per Payment', 'gross_annual': 'Gross Annual',
+        'net_premium': 'Net Premium', 'net_premium_help': 'Pure risk premium',
         'reserve_chart': 'Policy Reserve Curve', 'reserve_table': 'Reserve by Policy Year',
         'col_year': 'Policy Year', 'col_reserve': 'Reserve',
         'footer': '{age}y {gender} · Sum ¥{sum:,} · {term}yr · Rate {rate:.1%} · {risk} · {payment}',
@@ -78,14 +90,18 @@ st.sidebar.caption(t('pay_hint'))
 
 # Expense parameters
 st.sidebar.divider()
-alpha = st.sidebar.slider('α 获取费 (% × 保额)', 0.0, 15.0, 5.0, 0.5) / 100
-beta  = st.sidebar.slider('β 维持费 (% × 保费)', 0.0, 10.0, 2.0, 0.5) / 100
-gamma = st.sidebar.slider('γ 收费费 (‰ × 保额)', 0.0, 5.0, 0.5, 0.1) / 1000
-st.sidebar.caption('毛保费 = (纯保费 + 费用现值) ÷ (1 − β)')
+alpha = st.sidebar.slider(t('expense_alpha'), 0.0, 15.0, 5.0, 0.5) / 100
+beta  = st.sidebar.slider(t('expense_beta'), 0.0, 10.0, 2.0, 0.5) / 100
+gamma = st.sidebar.slider(t('expense_gamma'), 0.0, 5.0, 0.5, 0.1) / 1000
+st.sidebar.caption(t('expense_formula'))
 
 # Payment frequency
-freq_label = st.sidebar.radio('缴费频率', ['年缴', '半年缴', '季缴', '月缴'], horizontal=True)
-freq_map = {'年缴': 1, '半年缴': 2, '季缴': 4, '月缴': 12}
+freq_label = st.sidebar.radio(
+    t('freq_label'),
+    [t('freq_annual'), t('freq_semi'), t('freq_quarterly'), t('freq_monthly')],
+    horizontal=True,
+)
+freq_map = {t('freq_annual'): 1, t('freq_semi'): 2, t('freq_quarterly'): 4, t('freq_monthly'): 12}
 freq_m = freq_map[freq_label]
 
 if age + term > 105:
@@ -108,11 +124,11 @@ reserves = reserve_table(lt, age, sum_insured, term, rate)
 
 # Display
 c1, c2, c3 = st.columns(3)
-c1.metric(f'每期保费 ({freq_label})', f'¥{payment:,.0f}',
-          help=f'每次缴费金额 · 年毛保费 ¥{gap:,.0f}')
-c2.metric('年毛保费', f'¥{gap:,.0f}', help='含费用的年缴保费')
-c3.metric('纯保费 (净)', f'¥{net:,.0f}',
-          help='纯风险保费', delta=f'¥{gap - net:,.0f} 费用',
+c1.metric(f'{t("per_payment")} ({freq_label})', f'¥{payment:,.0f}',
+          help=f'Per-payment amount · Gross annual ¥{gap:,.0f}')
+c2.metric(t('gross_annual'), f'¥{gap:,.0f}', help='Annual premium with expenses')
+c3.metric(t('net_premium'), f'¥{net:,.0f}',
+          help=t('net_premium_help'), delta=f'¥{gap - net:,.0f}',
           delta_color='off')
 st.divider()
 
