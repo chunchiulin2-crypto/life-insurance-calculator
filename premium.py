@@ -155,13 +155,13 @@ def endowment_annual_premium(life_table, age, sum_insured, term, rate, claim_acc
 # ---- Life Annuity ----
 
 
-def annuity_price(life_table, age, annual_payment, term, rate, defer=0):
+def annuity_price(life_table, age, annual_payment, term, rate, defer=0, payout_m=1):
     """Compute lump-sum purchase price of a life annuity.
 
-    Pays `annual_payment` at the beginning of each year while (x) is alive,
-    for `term` years. Supports deferred annuities via `defer` parameter.
+    Pays `annual_payment` total per year, split into `payout_m` payments
+    (1=annual, 2=semi, 4=quarterly, 12=monthly). Each payment = annual_payment/payout_m.
 
-    Price = annual_payment * a_x:n (deferred if defer > 0)
+    Price = annual_payment * a(m)x:n (deferred if defer > 0)
     """
     if defer > 0:
         v = 1 / (1 + rate)
@@ -172,9 +172,9 @@ def annuity_price(life_table, age, annual_payment, term, rate, defer=0):
             return 0.0
         lx_def = lt.loc[x_idx + defer, 'lx']
         def_px = lx_def / lx if lx > 0 else 0
-        a_deferred = annuity_due(life_table, age + defer, term, rate)
+        a_deferred = m_thly_annuity_due(life_table, age + defer, term, rate, payout_m)
         return annual_payment * (v ** defer) * def_px * a_deferred
-    a = annuity_due(life_table, age, term, rate)
+    a = m_thly_annuity_due(life_table, age, term, rate, payout_m)
     return annual_payment * a
 
 
@@ -244,35 +244,36 @@ def periodic_premium(gross_annual, m):
 # ---- Deferred Annuity ----
 
 
-def deferred_annuity_premium(life_table, age, defer, annual_payment, rate, m=1):
+def deferred_annuity_premium(life_table, age, defer, annual_payment, rate, m=1, payout_m=1):
     """Compute annual premium for a deferred whole-life annuity.
 
-    Accumulation phase: pay premium P for `defer` years.
-    Payout phase: receive `annual_payment` per year for life, starting at age+defer.
+    Accumulation phase: pay premium P for `defer` years, `m` times per year.
+    Payout phase: receive `annual_payment` per year (paid `payout_m` times/year)
+    for life, starting at age+defer.
 
-    P × ä(m)age:defer⌉ = annual_payment × defer|ä(age+defer)
-
-    Returns: required annual premium P.
+    P × ä(m)age:defer⌉ = annual_payment × defer|ä(payout_m)(age+defer)
     """
     v = 1 / (1 + rate)
     lt = life_table
     x_idx = lt[lt['age'] == age].index[0]
     lx = lt.loc[x_idx, 'lx']
 
-    # Survival probability to end of deferment
     if x_idx + defer >= len(lt):
         return float('inf')
     lx_def = lt.loc[x_idx + defer, 'lx']
     def_px = lx_def / lx if lx > 0 else 0
 
-    # Whole-life annuity-due from payout age
-    a_payout = annuity_due_whole_life(life_table, age + defer, rate)
+    # m-thly whole-life annuity-due from payout age
+    # approximate via UDD: ä(m)x ≈ äx - (m-1)/2m
+    a_payout_annual = annuity_due_whole_life(life_table, age + defer, rate)
+    if payout_m > 1:
+        adj = (payout_m - 1) / (2 * payout_m)
+        a_payout = a_payout_annual - adj
+    else:
+        a_payout = a_payout_annual
 
-    # PV of benefits (at age):  v^defer × defer_p_x × a_payout
     pv_benefits = (v ** defer) * def_px * a_payout * annual_payment
-
-    # Annuity-due during accumulation (for premium payments)
-    a_accum = annuity_due(life_table, age, defer, rate)
+    a_accum = m_thly_annuity_due(life_table, age, defer, rate, m)
 
     if a_accum == 0:
         return float('inf')
@@ -280,12 +281,13 @@ def deferred_annuity_premium(life_table, age, defer, annual_payment, rate, m=1):
     return pv_benefits / a_accum
 
 
-def deferred_annuity_lump_sum(life_table, age, defer, annual_payment, rate):
+def deferred_annuity_lump_sum(life_table, age, defer, annual_payment, rate, payout_m=1):
     """Compute lump-sum purchase price of a deferred whole-life annuity.
 
-    Single payment now → receive annual_payment for life starting at age+defer.
+    Single payment now → receive annual_payment for life (paid payout_m times/yr),
+    starting at age+defer.
 
-    Price = annual_payment × v^defer × defer_p_x × ä(age+defer)
+    Price = annual_payment × v^defer × defer_p_x × ä(payout_m)(age+defer)
     """
     v = 1 / (1 + rate)
     lt = life_table
@@ -297,7 +299,13 @@ def deferred_annuity_lump_sum(life_table, age, defer, annual_payment, rate):
     lx_def = lt.loc[x_idx + defer, 'lx']
     def_px = lx_def / lx if lx > 0 else 0
 
-    a_payout = annuity_due_whole_life(life_table, age + defer, rate)
+    a_payout_annual = annuity_due_whole_life(life_table, age + defer, rate)
+    if payout_m > 1:
+        adj = (payout_m - 1) / (2 * payout_m)
+        a_payout = a_payout_annual - adj
+    else:
+        a_payout = a_payout_annual
+
     return annual_payment * (v ** defer) * def_px * a_payout
 
 

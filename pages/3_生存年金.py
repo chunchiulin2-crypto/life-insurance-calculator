@@ -13,8 +13,10 @@ T = {
         'caption': '活着每年领钱 · 趸缴购买价格 = 年领金额 × äx:n⌉',
         'age': '投保年龄', 'payment': '年领金额（元）', 'term': '领取年限',
         'rate': '预定利率（%）', 'gender': '性别', 'gender_m': '男', 'gender_f': '女',
+        'freq_payout': '领取频率',
+        'freq_annual': '年领', 'freq_semi': '半年领', 'freq_quarterly': '季领', 'freq_monthly': '月领',
         'price': '趸缴购买价格', 'price_help': '一次性购买该年金的保费',
-        'formula': '购买价格 = 年领金额 × ä{age}:{term}⌉',
+        'formula': '购买价格 = 年领金额 × ä(m){age}:{term}⌉',
         'note': '年金无责任准备金（签发后即开始支付）',
         'footer': '{age}岁 {gender} · 年领¥{sum:,} · {term}年 · 利率{rate:.1%}',
     },
@@ -23,8 +25,10 @@ T = {
         'caption': 'Periodic payments while alive · Purchase Price = Annual Payment × äx:n⌉',
         'age': 'Issue Age', 'payment': 'Annual Payment (¥)', 'term': 'Payment Period (years)',
         'rate': 'Interest Rate (%)', 'gender': 'Gender', 'gender_m': 'Male', 'gender_f': 'Female',
+        'freq_payout': 'Payout Frequency',
+        'freq_annual': 'Annual', 'freq_semi': 'Semi-annual', 'freq_quarterly': 'Quarterly', 'freq_monthly': 'Monthly',
         'price': 'Lump-Sum Purchase Price', 'price_help': 'One-time premium to purchase this annuity',
-        'formula': 'Purchase Price = Annual Payment × a_{age}:{term}',
+        'formula': 'Purchase Price = Annual Payment × a(m)_{age}:{term}',
         'note': 'Annuities have no policy reserves (payments begin immediately)',
         'footer': '{age}y {gender} · Yearly ¥{sum:,} · {term}yr · Rate {rate:.1%}',
     },
@@ -51,6 +55,14 @@ rate = st.sidebar.slider(t('rate'), 0.0, 10.0, 3.5, 0.5) / 100
 gender = st.sidebar.radio(t('gender'), [t('gender_m'), t('gender_f')], horizontal=True)
 gender_code = 'M' if gender == t('gender_m') else 'F'
 
+payout_label = st.sidebar.radio(
+    t('freq_payout'),
+    [t('freq_annual'), t('freq_semi'), t('freq_quarterly'), t('freq_monthly')],
+    horizontal=True,
+)
+payout_map = {t('freq_annual'): 1, t('freq_semi'): 2, t('freq_quarterly'): 4, t('freq_monthly'): 12}
+payout_m = payout_map[payout_label]
+
 if age + term > 105:
     st.sidebar.error(f'Age + Term = {age + term} exceeds 105')
     st.stop()
@@ -61,10 +73,14 @@ def get_lt(g):
     return build_life_table(load_table(DATA_PATH), g)
 
 lt = get_lt(gender_code)
-price = annuity_price(lt, age, annual_payment, term, rate)
+price = annuity_price(lt, age, annual_payment, term, rate, payout_m=payout_m)
+per_payment = annual_payment / payout_m
 
 # Display
-st.metric(t('price'), f'¥{price:,.0f}', help=t('price_help'))
+c1, c2 = st.columns(2)
+c1.metric(t('price'), f'¥{price:,.0f}', help=t('price_help'))
+c2.metric(f'每次领取 ({payout_label})', f'¥{per_payment:,.0f}',
+          help=f'年领总额 ¥{annual_payment:,} · 分{payout_m}次')
 st.caption(t('formula', age=age, term=term))
 st.info(t('note'))
 

@@ -20,6 +20,8 @@ T = {
         'freq_label': '缴费频率',
         'freq_annual': '年缴', 'freq_semi': '半年缴', 'freq_quarterly': '季缴', 'freq_monthly': '月缴',
         'freq_payout': '领取频率',
+        'freq_payout_annual': '年领', 'freq_payout_semi': '半年领', 'freq_payout_quarterly': '季领', 'freq_payout_monthly': '月领',
+        'per_payout': '每次领取金额',
         'annual_premium': '年缴保费',
         'per_payment': '每期保费',
         'lump_sum': '趸缴价格',
@@ -39,6 +41,8 @@ T = {
         'freq_label': 'Payment Frequency',
         'freq_annual': 'Annual', 'freq_semi': 'Semi-annual', 'freq_quarterly': 'Quarterly', 'freq_monthly': 'Monthly',
         'freq_payout': 'Payout Frequency',
+        'freq_payout_annual': 'Annual', 'freq_payout_semi': 'Semi-annual', 'freq_payout_quarterly': 'Quarterly', 'freq_payout_monthly': 'Monthly',
+        'per_payout': 'Per Payout',
         'annual_premium': 'Annual Premium',
         'per_payment': 'Per Payment',
         'lump_sum': 'Lump Sum Price',
@@ -86,25 +90,35 @@ with st.sidebar.expander(t('freq_label'), expanded=False):
 freq_map = {t('freq_annual'): 1, t('freq_semi'): 2, t('freq_quarterly'): 4, t('freq_monthly'): 12}
 freq_m = freq_map[freq_label]
 
+# Payout frequency
+payout_label = st.sidebar.radio(
+    t('freq_payout'),
+    [t('freq_payout_annual'), t('freq_payout_semi'), t('freq_payout_quarterly'), t('freq_payout_monthly')],
+    horizontal=True,
+)
+payout_map = {t('freq_payout_annual'): 1, t('freq_payout_semi'): 2, t('freq_payout_quarterly'): 4, t('freq_payout_monthly'): 12}
+payout_m = payout_map[payout_label]
+
 # Calculate
 @st.cache_data
 def get_lt(g):
     return build_life_table(load_table(DATA_PATH), g)
 
 lt = get_lt(gender_code)
-ap = deferred_annuity_premium(lt, age, defer, annual_payment, rate, m=freq_m)
+ap = deferred_annuity_premium(lt, age, defer, annual_payment, rate, m=freq_m, payout_m=payout_m)
 payment = periodic_premium(ap, freq_m)
-lump = deferred_annuity_lump_sum(lt, age, defer, annual_payment, rate)
+lump = deferred_annuity_lump_sum(lt, age, defer, annual_payment, rate, payout_m=payout_m)
+per_payout = annual_payment / payout_m
 
 # Display
 st.info(t('how_it_works', defer=defer, age=age, retire=retire_age, pay=annual_payment))
 
-c1, c2, c3 = st.columns(3)
-c1.metric(f'{t("per_payment")} ({freq_label})', f'¥{payment:,.0f}',
-          help=t('summary', age=age, defer=defer, retire=retire_age, pay=annual_payment))
-c2.metric(t('annual_premium'), f'¥{ap:,.0f}',
-          help='年化保费 / Annualized premium')
+c1, c2, c3, c4 = st.columns(4)
+c1.metric(f'{t("per_payment")} ({freq_label})', f'¥{payment:,.0f}')
+c2.metric(t('annual_premium'), f'¥{ap:,.0f}')
 c3.metric(t('lump_sum'), f'¥{lump:,.0f}', help=t('lump_sum_help'))
+c4.metric(f'{t("per_payout")} ({payout_label})', f'¥{per_payout:,.0f}',
+          help=f'年领总额 ¥{annual_payment:,} · 分{payout_m}次')
 
 # Visual: accumulation vs payout timeline
 st.divider()
