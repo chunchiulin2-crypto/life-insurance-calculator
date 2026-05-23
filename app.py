@@ -38,6 +38,10 @@ T = {
         'risk_standard': '标准体 (Standard)',
         'risk_substandard': '次标准体 (Substandard)',
         'risk_hint': '健康、不吸烟 → 优选 | 吸烟/超重/慢性病 → 次标准',
+        'payment_label': '赔付时点',
+        'payment_eoy': '死亡年末付款',
+        'payment_immediate': '死亡立即付款 (UDD)',
+        'payment_hint': '立即付款 = (1+i)^0.5 × 年末付款 · 年金不受影响',
         'error_age_term': '年龄 + 期限 ({age}+{term}={total}) 超过极限年龄 105',
         'single_premium': '趸缴纯保费',
         'single_premium_help': '一次性缴清的纯保费',
@@ -79,6 +83,10 @@ T = {
         'risk_standard': 'Standard',
         'risk_substandard': 'Substandard (Smoker, elevated risk)',
         'risk_hint': 'Healthy, non-smoker → Preferred | Smoker, chronic conditions → Substandard',
+        'payment_label': 'Death Benefit Timing',
+        'payment_eoy': 'End of Year of Death',
+        'payment_immediate': 'Immediate on Death (UDD)',
+        'payment_hint': 'Immediate = (1+i)^0.5 × End-of-Year · Annuity unaffected',
         'error_age_term': 'Age + Term ({age}+{term}={total}) exceeds limit age 105',
         'single_premium': 'Net Single Premium',
         'single_premium_help': 'One-time lump-sum premium',
@@ -178,6 +186,15 @@ risk_map = {
 risk_factor = risk_map[risk_label]
 st.sidebar.caption(t('risk_hint'))
 
+# Payment timing
+payment_label = st.sidebar.radio(
+    t('payment_label'),
+    [t('payment_eoy'), t('payment_immediate')],
+    horizontal=True,
+)
+claim_accel = (payment_label == t('payment_immediate'))
+st.sidebar.caption(t('payment_hint'))
+
 # Validate
 if product != t('product_whole_life') and age + term > 105:
     st.sidebar.error(t('error_age_term', age=age, term=term, total=age + term))
@@ -193,8 +210,8 @@ lt = get_life_table(gender_code, risk_factor)
 
 # Dispatch by product
 if product == t('product_whole_life'):
-    sp = whole_life_single_premium(lt, age, sum_insured, rate)
-    ap = whole_life_annual_premium(lt, age, sum_insured, rate)
+    sp = whole_life_single_premium(lt, age, sum_insured, rate, claim_accel=claim_accel)
+    ap = whole_life_annual_premium(lt, age, sum_insured, rate, claim_accel=claim_accel)
     reserves = whole_life_reserve_table(lt, age, sum_insured, rate)
     footer_key = 'footer_wl'
 elif product == t('product_annuity'):
@@ -203,13 +220,13 @@ elif product == t('product_annuity'):
     reserves = []
     footer_key = 'footer_annuity'
 elif product == t('product_endowment'):
-    sp = endowment_single_premium(lt, age, sum_insured, term, rate)
-    ap = endowment_annual_premium(lt, age, sum_insured, term, rate)
+    sp = endowment_single_premium(lt, age, sum_insured, term, rate, claim_accel=claim_accel)
+    ap = endowment_annual_premium(lt, age, sum_insured, term, rate, claim_accel=claim_accel)
     reserves = endowment_reserve_table(lt, age, sum_insured, term, rate)
     footer_key = 'footer_endow'
 else:  # term
-    sp = single_premium(lt, age, sum_insured, term, rate)
-    ap = annual_premium(lt, age, sum_insured, term, rate)
+    sp = single_premium(lt, age, sum_insured, term, rate, claim_accel=claim_accel)
+    ap = annual_premium(lt, age, sum_insured, term, rate, claim_accel=claim_accel)
     reserves = reserve_table(lt, age, sum_insured, term, rate)
     footer_key = 'footer_term'
 

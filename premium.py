@@ -25,12 +25,13 @@ def annuity_due(life_table, age, term, rate):
     return total
 
 
-def single_premium(life_table, age, sum_insured, term, rate):
+def single_premium(life_table, age, sum_insured, term, rate, claim_accel=False):
     """Compute net single premium for term life insurance.
 
     A_x:n * S = S * sum(t=1 to n) v^t * t-1|q_x
 
-    where t-1|q_x = (l_x+t-1 - l_x+t) / l_x
+    If claim_accel=True: death benefit paid immediately upon death (UDD assumption).
+    A_bar_x:n = (1+i)^0.5 * A_x:n
     """
     v = 1 / (1 + rate)
     lt = life_table
@@ -44,15 +45,18 @@ def single_premium(life_table, age, sum_insured, term, rate):
         lx_t = lt.loc[x_idx + t, 'lx']
         t_minus_1_qx = (lx_t1 - lx_t) / lx if lx > 0 else 0
         total += (v ** t) * t_minus_1_qx
-    return sum_insured * total
+    result = sum_insured * total
+    if claim_accel:
+        result *= (1 + rate) ** 0.5
+    return result
 
 
-def annual_premium(life_table, age, sum_insured, term, rate):
+def annual_premium(life_table, age, sum_insured, term, rate, claim_accel=False):
     """Compute net level annual premium for term life insurance.
 
     P = (S * A_x:n) / a_x:n
     """
-    sp = single_premium(life_table, age, sum_insured, term, rate)
+    sp = single_premium(life_table, age, sum_insured, term, rate, claim_accel)
     a = annuity_due(life_table, age, term, rate)
     if a == 0:
         return 0
@@ -80,7 +84,7 @@ def annuity_due_whole_life(life_table, age, rate):
     return total
 
 
-def whole_life_single_premium(life_table, age, sum_insured, rate):
+def whole_life_single_premium(life_table, age, sum_insured, rate, claim_accel=False):
     """Compute net single premium for whole life insurance.
 
     A_x * S = S * sum(t=1 to 105-x) v^t * t-1|q_x
@@ -96,15 +100,18 @@ def whole_life_single_premium(life_table, age, sum_insured, rate):
         lx_t = lt.loc[x_idx + t, 'lx']
         t_minus_1_qx = (lx_t1 - lx_t) / lx if lx > 0 else 0
         total += (v ** t) * t_minus_1_qx
-    return sum_insured * total
+    result = sum_insured * total
+    if claim_accel:
+        result *= (1 + rate) ** 0.5
+    return result
 
 
-def whole_life_annual_premium(life_table, age, sum_insured, rate):
+def whole_life_annual_premium(life_table, age, sum_insured, rate, claim_accel=False):
     """Compute net level annual premium for whole life insurance.
 
     P = (S * A_x) / a_x
     """
-    sp = whole_life_single_premium(life_table, age, sum_insured, rate)
+    sp = whole_life_single_premium(life_table, age, sum_insured, rate, claim_accel)
     a = annuity_due_whole_life(life_table, age, rate)
     return sp / a if a > 0 else 0
 
@@ -125,20 +132,22 @@ def pure_endowment(life_table, age, term, rate):
     return (v ** term) * npx
 
 
-def endowment_single_premium(life_table, age, sum_insured, term, rate):
+def endowment_single_premium(life_table, age, sum_insured, term, rate, claim_accel=False):
     """Compute net single premium for endowment insurance.
 
     A_x:n(endow) = A_x:n(term) + nEx * S
-    Death benefit + survival benefit at maturity.
+
+    If claim_accel=True: only the death benefit part is accelerated.
+    The pure endowment (survival benefit) is always paid at maturity.
     """
-    sp_term = single_premium(life_table, age, sum_insured, term, rate)
+    sp_term = single_premium(life_table, age, sum_insured, term, rate, claim_accel)
     pe = pure_endowment(life_table, age, term, rate)
     return sp_term + sum_insured * pe
 
 
-def endowment_annual_premium(life_table, age, sum_insured, term, rate):
+def endowment_annual_premium(life_table, age, sum_insured, term, rate, claim_accel=False):
     """Compute net level annual premium for endowment insurance."""
-    sp = endowment_single_premium(life_table, age, sum_insured, term, rate)
+    sp = endowment_single_premium(life_table, age, sum_insured, term, rate, claim_accel)
     a = annuity_due(life_table, age, term, rate)
     return sp / a if a > 0 else 0
 

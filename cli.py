@@ -49,6 +49,8 @@ Examples:
                    help=f'产品类型: {", ".join(f"{k}={v}" for k, v in PRODUCTS.items())} (默认: term)')
     p.add_argument('--risk', choices=list(RISK_CLASSES.keys()), default='standard',
                    help='核保等级: preferred(优选)/standard(标准)/substandard(次标准) (默认: standard)')
+    p.add_argument('--claim-accel', action='store_true', default=False,
+                   help='死亡立即付款 (默认: 年末付款, UDD假设下立即付款 = (1+i)^0.5 × 年末付款)')
     return p.parse_args()
 
 
@@ -101,29 +103,32 @@ def main():
         print(f'  保险期限:      {args.term} 年')
     print(f'  预定利率:      {args.rate:.2%}')
     risk = RISK_CLASSES[args.risk]
+    payment_mode = '死亡立即付款 (UDD)' if args.claim_accel else '死亡年末付款'
     print(f'  核保等级:      {risk["label"]} (qx × {risk["factor"]})')
+    print(f'  赔付时点:      {payment_mode}')
     print(f'  生命表:        CLT 2010-2013 (非养老类)')
     print()
 
     df = load_table(DATA_PATH)
     lt = build_life_table(df, args.gender, risk_factor=risk['factor'])
+    ca = args.claim_accel
 
     # Dispatch by product
     if args.product == 'whole_life':
-        sp = whole_life_single_premium(lt, args.age, args.sum, args.rate)
-        ap = whole_life_annual_premium(lt, args.age, args.sum, args.rate)
+        sp = whole_life_single_premium(lt, args.age, args.sum, args.rate, claim_accel=ca)
+        ap = whole_life_annual_premium(lt, args.age, args.sum, args.rate, claim_accel=ca)
         reserves = whole_life_reserve_table(lt, args.age, args.sum, args.rate)
     elif args.product == 'annuity':
         sp = annuity_price(lt, args.age, args.sum, args.term, args.rate)
         ap = None
         reserves = []
     elif args.product == 'endowment':
-        sp = endowment_single_premium(lt, args.age, args.sum, args.term, args.rate)
-        ap = endowment_annual_premium(lt, args.age, args.sum, args.term, args.rate)
+        sp = endowment_single_premium(lt, args.age, args.sum, args.term, args.rate, claim_accel=ca)
+        ap = endowment_annual_premium(lt, args.age, args.sum, args.term, args.rate, claim_accel=ca)
         reserves = endowment_reserve_table(lt, args.age, args.sum, args.term, args.rate)
     else:  # term
-        sp = single_premium(lt, args.age, args.sum, args.term, args.rate)
-        ap = annual_premium(lt, args.age, args.sum, args.term, args.rate)
+        sp = single_premium(lt, args.age, args.sum, args.term, args.rate, claim_accel=ca)
+        ap = annual_premium(lt, args.age, args.sum, args.term, args.rate, claim_accel=ca)
         reserves = reserve_table(lt, args.age, args.sum, args.term, args.rate)
 
     print('  ────────────────────────────────────────────')
