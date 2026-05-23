@@ -4,6 +4,8 @@ import streamlit as st
 import pandas as pd
 import os
 from mortality import load_table, build_life_table
+
+AM92_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'am92.csv')
 from premium import (deferred_whole_life_annual_premium, deferred_term_annual_premium,
                      deferred_whole_life_single_premium, deferred_term_single_premium,
                      periodic_premium)
@@ -14,7 +16,12 @@ DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'clt_2010_2013
 T = {
     'zh': {
         'title': '递延寿险 · Deferred Assurance',
-        'caption': '先缴费 · 后保障 · 递延期内死亡不赔付',
+        'caption': '先缴费 · 后保障 · 递延期内死亡不赔付',,
+        'table_label': '生命表',
+        'table_clt': 'CLT 2010-2013',
+        'table_am92ult': 'AM92 Ultimate',
+        'table_am92sel': 'AM92 Select',
+        'table_am92sel_plusone': 'AM92 Select+1',
         'age': '当前年龄',
         'start_age': '保障开始年龄',
         'sum': '保险金额（元）',
@@ -39,7 +46,12 @@ T = {
     },
     'en': {
         'title': 'Deferred Life Assurance',
-        'caption': 'Pay now · Covered later · No benefit if death during deferment',
+        'caption': 'Pay now · Covered later · No benefit if death during deferment',,
+        'table_label': '生命表',
+        'table_clt': 'CLT 2010-2013',
+        'table_am92ult': 'AM92 Ultimate',
+        'table_am92sel': 'AM92 Select',
+        'table_am92sel_plusone': 'AM92 Select+1',
         'age': 'Current Age',
         'start_age': 'Coverage Start Age',
         'sum': 'Sum Insured (¥)',
@@ -121,7 +133,7 @@ freq_m = freq_map[freq_label]
 # Calculate
 @st.cache_data
 def get_lt(g, rf):
-    return build_life_table(load_table(DATA_PATH), g, risk_factor=rf)
+    return build_life_table(load_table(table_path), g if table_col == 'clt' else table_col, risk_factor=rf)
 
 lt = get_lt(gender_code, risk_map[risk_label])
 

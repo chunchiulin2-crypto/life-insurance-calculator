@@ -7,11 +7,17 @@ from mortality import load_table, build_life_table
 from premium import deferred_annuity_premium, deferred_annuity_lump_sum, periodic_premium
 
 DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'clt_2010_2013.csv')
+AM92_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'am92.csv')
 
 T = {
     'zh': {
         'title': '递延终身年金 · Deferred Annuity',
-        'caption': '先缴费 · 后领钱 · 活多久领多久',
+        'caption': '先缴费 · 后领钱 · 活多久领多久',,
+        'table_label': '生命表',
+        'table_clt': 'CLT 2010-2013',
+        'table_am92ult': 'AM92 Ultimate',
+        'table_am92sel': 'AM92 Select',
+        'table_am92sel_plusone': 'AM92 Select+1',
         'age': '当前年龄',
         'retire_age': '开始领取年龄',
         'payment': '年领金额（元）',
@@ -32,7 +38,12 @@ T = {
     },
     'en': {
         'title': 'Deferred Life Annuity',
-        'caption': 'Pay now · Receive later · For life',
+        'caption': 'Pay now · Receive later · For life',,
+        'table_label': '生命表',
+        'table_clt': 'CLT 2010-2013',
+        'table_am92ult': 'AM92 Ultimate',
+        'table_am92sel': 'AM92 Select',
+        'table_am92sel_plusone': 'AM92 Select+1',
         'age': 'Current Age',
         'retire_age': 'Age to Start Receiving',
         'payment': 'Annual Payout (¥)',
@@ -102,7 +113,7 @@ payout_m = payout_map[payout_label]
 # Calculate
 @st.cache_data
 def get_lt(g):
-    return build_life_table(load_table(DATA_PATH), g)
+    return build_life_table(load_table(table_path), g if table_col == 'clt' else table_col)
 
 lt = get_lt(gender_code)
 ap = deferred_annuity_premium(lt, age, defer, annual_payment, rate, m=freq_m, payout_m=payout_m)

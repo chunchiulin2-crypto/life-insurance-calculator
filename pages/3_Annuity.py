@@ -6,11 +6,17 @@ from mortality import load_table, build_life_table
 from premium import annuity_price
 
 DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'clt_2010_2013.csv')
+AM92_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'am92.csv')
 
 T = {
     'zh': {
         'title': '生存年金 · Life Annuity',
-        'caption': '活着每年领钱 · 趸缴购买价格 = 年领金额 × äx:n⌉',
+        'caption': '活着每年领钱 · 趸缴购买价格 = 年领金额 × äx:n⌉',,
+        'table_label': '生命表',
+        'table_clt': 'CLT 2010-2013',
+        'table_am92ult': 'AM92 Ultimate',
+        'table_am92sel': 'AM92 Select',
+        'table_am92sel_plusone': 'AM92 Select+1',
         'age': '投保年龄', 'payment': '年领金额（元）', 'term': '领取年限',
         'rate': '预定利率（%）', 'gender': '性别', 'gender_m': '男', 'gender_f': '女',
         'freq_payout': '领取频率',
@@ -22,7 +28,17 @@ T = {
     },
     'en': {
         'title': 'Life Annuity',
-        'caption': 'Periodic payments while alive · Purchase Price = Annual Payment × äx:n⌉',
+        'caption': 'Periodic payments while alive · Purchase Price = Annual Payment × äx:n⌉',,
+        'table_label': '生命表',
+        'table_clt': 'CLT 2010-2013',
+        'table_am92ult': 'AM92 Ultimate',
+        'table_am92sel': 'AM92 Select',
+        'table_am92sel_plusone': 'AM92 Select+1',,
+        'table_label': 'Life Table',
+        'table_clt': 'CLT 2010-2013',
+        'table_am92ult': 'AM92 Ultimate',
+        'table_am92sel': 'AM92 Select',
+        'table_am92sel_plusone': 'AM92 Select+1',
         'age': 'Issue Age', 'payment': 'Annual Payment (¥)', 'term': 'Payment Period (years)',
         'rate': 'Interest Rate (%)', 'gender': 'Gender', 'gender_m': 'Male', 'gender_f': 'Female',
         'freq_payout': 'Payout Frequency',
@@ -70,7 +86,7 @@ if age + term > 105:
 # Calculate
 @st.cache_data
 def get_lt(g):
-    return build_life_table(load_table(DATA_PATH), g)
+    return build_life_table(load_table(table_path), g if table_col == 'clt' else table_col)
 
 lt = get_lt(gender_code)
 price = annuity_price(lt, age, annual_payment, term, rate, payout_m=payout_m)

@@ -4,6 +4,8 @@ import streamlit as st
 import pandas as pd
 import os
 from mortality import load_table, build_life_table
+
+AM92_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'am92.csv')
 from premium import endowment_single_premium, endowment_annual_premium
 from reserve import endowment_reserve_table
 
@@ -12,7 +14,12 @@ DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'clt_2010_2013
 T = {
     'zh': {
         'title': '两全保险 · Endowment',
-        'caption': '死亡赔钱 + 到期生存返还 · 保障 + 储蓄',
+        'caption': '死亡赔钱 + 到期生存返还 · 保障 + 储蓄',,
+        'table_label': '生命表',
+        'table_clt': 'CLT 2010-2013',
+        'table_am92ult': 'AM92 Ultimate',
+        'table_am92sel': 'AM92 Select',
+        'table_am92sel_plusone': 'AM92 Select+1',
         'age': '投保年龄', 'sum': '保险金额（元）', 'term': '保险期限（年）',
         'rate': '预定利率（%）', 'gender': '性别', 'gender_m': '男', 'gender_f': '女',
         'risk_label': '核保等级',
@@ -40,7 +47,17 @@ T = {
     },
     'en': {
         'title': 'Endowment Insurance',
-        'caption': 'Death benefit + survival benefit at maturity · Protection + Savings',
+        'caption': 'Death benefit + survival benefit at maturity · Protection + Savings',,
+        'table_label': '生命表',
+        'table_clt': 'CLT 2010-2013',
+        'table_am92ult': 'AM92 Ultimate',
+        'table_am92sel': 'AM92 Select',
+        'table_am92sel_plusone': 'AM92 Select+1',,
+        'table_label': 'Life Table',
+        'table_clt': 'CLT 2010-2013',
+        'table_am92ult': 'AM92 Ultimate',
+        'table_am92sel': 'AM92 Select',
+        'table_am92sel_plusone': 'AM92 Select+1',
         'age': 'Issue Age', 'sum': 'Sum Insured (¥)', 'term': 'Policy Term (years)',
         'rate': 'Interest Rate (%)', 'gender': 'Gender', 'gender_m': 'Male', 'gender_f': 'Female',
         'risk_label': 'Underwriting Class',
@@ -123,7 +140,7 @@ from premium import gross_annual_premium, periodic_premium, endowment_annual_pre
 
 @st.cache_data
 def get_lt(g, rf):
-    return build_life_table(load_table(DATA_PATH), g, risk_factor=rf)
+    return build_life_table(load_table(table_path), g if table_col == 'clt' else table_col, risk_factor=rf)
 
 lt = get_lt(gender_code, risk_map[risk_label])
 gap = gross_annual_premium(lt, age, sum_insured, term, rate,

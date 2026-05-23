@@ -6,11 +6,17 @@ from mortality import load_table, build_life_table
 from premium import pure_endowment_single_premium, pure_endowment_annual_premium, periodic_premium
 
 DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'clt_2010_2013.csv')
+AM92_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'am92.csv')
 
 T = {
     'zh': {
         'title': '纯生存保险 · Pure Endowment',
-        'caption': '活到约定年龄 → 拿钱 · 中途死亡 → 不赔付',
+        'caption': '活到约定年龄 → 拿钱 · 中途死亡 → 不赔付',,
+        'table_label': '生命表',
+        'table_clt': 'CLT 2010-2013',
+        'table_am92ult': 'AM92 Ultimate',
+        'table_am92sel': 'AM92 Select',
+        'table_am92sel_plusone': 'AM92 Select+1',
         'age': '当前年龄',
         'maturity_age': '约定领钱年龄',
         'sum': '满期保险金（元）',
@@ -26,7 +32,12 @@ T = {
     },
     'en': {
         'title': 'Pure Endowment',
-        'caption': 'Survive to maturity → receive lump sum · Die before → nothing',
+        'caption': 'Survive to maturity → receive lump sum · Die before → nothing',,
+        'table_label': '生命表',
+        'table_clt': 'CLT 2010-2013',
+        'table_am92ult': 'AM92 Ultimate',
+        'table_am92sel': 'AM92 Select',
+        'table_am92sel_plusone': 'AM92 Select+1',
         'age': 'Current Age',
         'maturity_age': 'Maturity Age',
         'sum': 'Maturity Benefit (¥)',
@@ -81,7 +92,7 @@ if age + defer > 105:
 # Calculate
 @st.cache_data
 def get_lt(g):
-    return build_life_table(load_table(DATA_PATH), g)
+    return build_life_table(load_table(table_path), g if table_col == 'clt' else table_col)
 
 lt = get_lt(gender_code)
 sp = pure_endowment_single_premium(lt, age, sum_insured, defer, rate)
