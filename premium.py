@@ -299,3 +299,65 @@ def deferred_annuity_lump_sum(life_table, age, defer, annual_payment, rate):
 
     a_payout = annuity_due_whole_life(life_table, age + defer, rate)
     return annual_payment * (v ** defer) * def_px * a_payout
+
+
+# ---- Deferred Life Assurance ----
+
+
+def deferred_whole_life_single_premium(life_table, age, defer, sum_insured, rate, claim_accel=False):
+    """Net single premium for deferred whole life assurance.
+
+    n|Ax × S = v^n × npx × Ax+n × S
+
+    Coverage begins at age+defer, continues for life.
+    No benefit if death occurs during deferment.
+    """
+    v = 1 / (1 + rate)
+    lt = life_table
+    x_idx = lt[lt['age'] == age].index[0]
+    lx = lt.loc[x_idx, 'lx']
+    if x_idx + defer >= len(lt):
+        return float('inf')
+    lx_def = lt.loc[x_idx + defer, 'lx']
+    npx = lx_def / lx if lx > 0 else 0
+    axn = whole_life_single_premium(life_table, age + defer, sum_insured, rate, claim_accel)
+    return (v ** defer) * npx * axn
+
+
+def deferred_whole_life_annual_premium(life_table, age, defer, sum_insured, rate, claim_accel=False):
+    """Annual premium for deferred whole life assurance, paid during deferment.
+
+    P = (S × n|Ax) / äx:defer⌉
+    """
+    sp = deferred_whole_life_single_premium(life_table, age, defer, sum_insured, rate, claim_accel)
+    a = annuity_due(life_table, age, defer, rate)
+    return sp / a if a > 0 else 0
+
+
+def deferred_term_single_premium(life_table, age, defer, coverage, sum_insured, rate, claim_accel=False):
+    """Net single premium for deferred term assurance.
+
+    n|Ax:m⌉ × S = v^n × npx × Ax+n:m⌉ × S
+
+    Coverage from age+defer for `coverage` years.
+    """
+    v = 1 / (1 + rate)
+    lt = life_table
+    x_idx = lt[lt['age'] == age].index[0]
+    lx = lt.loc[x_idx, 'lx']
+    if x_idx + defer >= len(lt):
+        return float('inf')
+    lx_def = lt.loc[x_idx + defer, 'lx']
+    npx = lx_def / lx if lx > 0 else 0
+    axn = single_premium(life_table, age + defer, sum_insured, coverage, rate, claim_accel)
+    return (v ** defer) * npx * axn
+
+
+def deferred_term_annual_premium(life_table, age, defer, coverage, sum_insured, rate, claim_accel=False):
+    """Annual premium for deferred term assurance, paid during deferment.
+
+    P = (S × n|Ax:m⌉) / äx:defer⌉
+    """
+    sp = deferred_term_single_premium(life_table, age, defer, coverage, sum_insured, rate, claim_accel)
+    a = annuity_due(life_table, age, defer, rate)
+    return sp / a if a > 0 else 0
