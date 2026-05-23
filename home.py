@@ -16,7 +16,6 @@ T = {
             ('递延寿险', '先缴费后保障。递延期无赔付。'),
             ('纯生存保险', '活到约定年龄拿钱。纯储蓄。'),
         ],
-        ],
     },
     'en': {
         'title': 'Life Insurance Actuarial Calculator',
