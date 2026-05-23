@@ -78,20 +78,38 @@ pay_label = st.sidebar.radio(t('payment_label'), [t('pay_eoy'), t('pay_imm')], h
 claim_accel = (pay_label == t('pay_imm'))
 st.sidebar.caption(t('pay_hint'))
 
+st.sidebar.divider()
+alpha = st.sidebar.slider('α 获取费 (% × 保额)', 0.0, 15.0, 5.0, 0.5) / 100
+beta  = st.sidebar.slider('β 维持费 (% × 保费)', 0.0, 10.0, 2.0, 0.5) / 100
+gamma = st.sidebar.slider('γ 收费费 (‰ × 保额)', 0.0, 5.0, 0.5, 0.1) / 1000
+st.sidebar.caption('毛保费 = (纯保费 + 费用现值) ÷ (1 − β)')
+
+freq_label = st.sidebar.radio('缴费频率', ['年缴', '半年缴', '季缴', '月缴'], horizontal=True)
+freq_map = {'年缴': 1, '半年缴': 2, '季缴': 4, '月缴': 12}
+freq_m = freq_map[freq_label]
+
 # Calculate
+from premium import gross_annual_premium, periodic_premium, whole_life_annual_premium as net_wl_ap
+
 @st.cache_data
 def get_lt(g, rf):
     return build_life_table(load_table(DATA_PATH), g, risk_factor=rf)
 
 lt = get_lt(gender_code, risk_map[risk_label])
-sp = whole_life_single_premium(lt, age, sum_insured, rate, claim_accel)
-ap = whole_life_annual_premium(lt, age, sum_insured, rate, claim_accel)
+gap = gross_annual_premium(lt, age, sum_insured, 105 - age, rate,
+                           alpha=alpha, beta=beta, gamma=gamma, claim_accel=claim_accel)
+payment = periodic_premium(gap, freq_m)
+net = net_wl_ap(lt, age, sum_insured, rate, claim_accel)
 reserves = whole_life_reserve_table(lt, age, sum_insured, rate)
 
 # Display
-c1, c2 = st.columns(2)
-c1.metric(t('sp'), f'¥{sp:,.0f}', help=t('sp_help'))
-c2.metric(t('ap'), f'¥{ap:,.0f}', help=t('ap_help'))
+c1, c2, c3 = st.columns(3)
+c1.metric(f'每期保费 ({freq_label})', f'¥{payment:,.0f}',
+          help=f'每次缴费金额 · 年毛保费 ¥{gap:,.0f}')
+c2.metric('年毛保费', f'¥{gap:,.0f}', help='含费用的年缴保费')
+c3.metric('纯保费 (净)', f'¥{net:,.0f}',
+          help='纯风险保费', delta=f'¥{gap - net:,.0f} 费用',
+          delta_color='off')
 st.divider()
 
 st.subheader(t('reserve_chart'))
