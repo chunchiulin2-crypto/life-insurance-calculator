@@ -51,7 +51,7 @@ def t(key, **kw):
 if 'lang' not in st.session_state:
     st.session_state.lang = 'zh'
 
-st.set_page_config(page_title=t('title'), page_icon='🎓', layout='wide')
+st.set_page_config(page_title=t('title'), layout='wide')
 st.title(t('title'))
 st.caption(t('caption'))
 

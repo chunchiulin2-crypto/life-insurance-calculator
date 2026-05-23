@@ -2,30 +2,30 @@
 
 import streamlit as st
 
-st.set_page_config(page_title='精算计算器', page_icon='🛡️', layout='wide')
+st.set_page_config(page_title='精算计算器', layout='wide')
 
 # ---- i18n Navigation Labels ----
 NAV = {
     'zh': {
-        'home': '🏠 首页',
-        'term': '🏠 定期寿险',
-        'whole_life': '🔒 终身寿险',
-        'annuity': '💰 生存年金',
-        'endowment': '🎯 两全保险',
-        'def_annuity': '⏳ 递延年金',
-        'def_assurance': '⏰ 递延寿险',
-        'pure_endow': '🎓 纯生存保险',
+        'home': '首页',
+        'term': '定期寿险',
+        'whole_life': '终身寿险',
+        'annuity': '生存年金',
+        'endowment': '两全保险',
+        'def_annuity': '递延年金',
+        'def_assurance': '递延寿险',
+        'pure_endow': '纯生存保险',
         'lang_label': '语言 / Language',
     },
     'en': {
-        'home': '🏠 Home',
-        'term': '🏠 Term Life',
-        'whole_life': '🔒 Whole Life',
-        'annuity': '💰 Life Annuity',
-        'endowment': '🎯 Endowment',
-        'def_annuity': '⏳ Deferred Annuity',
-        'def_assurance': '⏰ Deferred Assurance',
-        'pure_endow': '🎓 Pure Endowment',
+        'home': 'Home',
+        'term': 'Term Life',
+        'whole_life': 'Whole Life',
+        'annuity': 'Life Annuity',
+        'endowment': 'Endowment',
+        'def_annuity': 'Deferred Annuity',
+        'def_assurance': 'Deferred Assurance',
+        'pure_endow': 'Pure Endowment',
         'lang_label': '语言 / Language',
     },
 }

@@ -1,0 +1,95 @@
+<h2>寿险保费计算器 · Web 版 UI 设计</h2>
+<p class="subtitle">Streamlit 单页应用 · 直接 import 现有计算模块</p>
+
+<div class="section">
+  <h3>页面布局</h3>
+  <div class="mockup">
+    <div class="mockup-header">浏览器窗口</div>
+    <div class="mockup-body" style="padding:0;">
+      <!-- Header -->
+      <div style="background:#5b4636;color:#fff;padding:24px 32px;text-align:center;">
+        <h3 style="margin:0;color:#fff;">定期寿险保费计算器</h3>
+        <p style="margin:4px 0 0;opacity:0.7;font-size:13px;">CLT 2010-2013 生命表 · 趸缴/年缴纯保费 · 责任准备金</p>
+      </div>
+      <!-- Sidebar -->
+      <div style="display:flex;min-height:400px;">
+        <div style="width:280px;background:#faf7f2;padding:20px;border-right:1px solid #e5ded6;">
+          <p style="font-weight:700;color:#5b4636;margin:0 0 16px;">📋 投保参数</p>
+          <div style="margin-bottom:12px;">
+            <div class="label">投保年龄</div>
+            <div class="mock-input" style="width:100%;">30</div>
+          </div>
+          <div style="margin-bottom:12px;">
+            <div class="label">保险金额 (万元)</div>
+            <div class="mock-input" style="width:100%;">100</div>
+          </div>
+          <div style="margin-bottom:12px;">
+            <div class="label">保险期限 (年)</div>
+            <div class="mock-input" style="width:100%;">20</div>
+          </div>
+          <div style="margin-bottom:12px;">
+            <div class="label">预定利率 (%)</div>
+            <div class="mock-input" style="width:100%;">3.5</div>
+          </div>
+          <div style="margin-bottom:16px;">
+            <div class="label">性别</div>
+            <div class="mock-input" style="width:100%;">男</div>
+          </div>
+          <button class="mock-button" style="width:100%;background:#5b4636;color:#fff;font-size:15px;padding:12px;">计算保费</button>
+        </div>
+        <!-- Main content -->
+        <div style="flex:1;padding:24px;">
+          <!-- Premium cards -->
+          <div style="display:flex;gap:16px;margin-bottom:24px;">
+            <div style="flex:1;background:linear-gradient(135deg,#5b4636,#7a5f4b);color:#fff;padding:20px;border-radius:10px;text-align:center;">
+              <p style="margin:0;font-size:12px;opacity:0.8;">趸缴纯保费</p>
+              <p style="margin:8px 0 0;font-size:28px;font-weight:700;">¥16,309</p>
+            </div>
+            <div style="flex:1;background:linear-gradient(135deg,#3d6b3d,#5b8b5b);color:#fff;padding:20px;border-radius:10px;text-align:center;">
+              <p style="margin:0;font-size:12px;opacity:0.8;">年缴纯保费</p>
+              <p style="margin:8px 0 0;font-size:28px;font-weight:700;">¥1,117</p>
+            </div>
+          </div>
+          <!-- Chart area -->
+          <div style="background:#fff;border:1px solid #e5ded6;border-radius:10px;padding:20px;">
+            <p style="font-weight:700;color:#5b4636;margin:0 0 12px;">📊 责任准备金曲线</p>
+            <div class="placeholder" style="height:200px;display:flex;align-items:center;justify-content:center;">
+              [折线图：Year vs Reserve · Streamlit line_chart]
+            </div>
+          </div>
+          <!-- Table -->
+          <div style="background:#fff;border:1px solid #e5ded6;border-radius:10px;padding:20px;margin-top:16px;">
+            <p style="font-weight:700;color:#5b4636;margin:0 0 12px;">📋 各年末准备金明细</p>
+            <div class="placeholder" style="height:150px;display:flex;align-items:center;justify-content:center;">
+              [数据表：Year | Reserve · Streamlit dataframe]
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>技术要点</h3>
+  <table style="width:100%;border-collapse:collapse;">
+    <tr style="border-bottom:1px solid #e5ded6;">
+      <th style="text-align:left;padding:8px;">要点</th><th style="text-align:left;padding:8px;">方案</th>
+    </tr>
+    <tr style="border-bottom:1px solid #e5ded6;">
+      <td style="padding:8px;">计算引擎</td><td style="padding:8px;">直接 import 现有 mortality/premium/reserve 模块</td>
+    </tr>
+    <tr style="border-bottom:1px solid #e5ded6;">
+      <td style="padding:8px;">输入控件</td><td style="padding:8px;">st.sidebar: slider(年龄) + number_input(保额/期限/利率) + radio(性别)</td>
+    </tr>
+    <tr style="border-bottom:1px solid #e5ded6;">
+      <td style="padding:8px;">保费展示</td><td style="padding:8px;">st.metric 卡片显示趸缴/年缴</td>
+    </tr>
+    <tr style="border-bottom:1px solid #e5ded6;">
+      <td style="padding:8px;">准备金图表</td><td style="padding:8px;">st.line_chart 折线图 + st.dataframe 数据表</td>
+    </tr>
+    <tr style="border-bottom:1px solid #e5ded6;">
+      <td style="padding:8px;">启动命令</td><td style="padding:8px;">streamlit run app.py</td>
+    </tr>
+  </table>
+</div>

@@ -1,0 +1,86 @@
+<h2>保险定制平台 · 设计总览</h2>
+<p class="subtitle">Gross Premium + 缴费频率 · 从"计算器"变成"配置工具"</p>
+
+<div class="section">
+  <h3>1. 费用结构 — α/β/γ 三分法</h3>
+  <div class="mockup">
+    <div class="mockup-header">新参数面板（每个产品页面新增）</div>
+    <div class="mockup-body" style="padding:20px;font-family:monospace;font-size:13px;line-height:1.8;">
+      <p><strong>费用参数 (Expense Parameters)</strong></p>
+      <p>α (获取费) = <span style="color:#5b4636;">5.0 %</span>  × 保额  <span style="color:#8c8076;">— 一次性，首年收取</span></p>
+      <p>β (维持费) = <span style="color:#5b4636;">2.0 %</span>  × 年保费 <span style="color:#8c8076;">— 每年收取</span></p>
+      <p>γ (收费费) = <span style="color:#5b4636;">0.5 ‰</span> × 保额  <span style="color:#8c8076;">— 每次缴费收取</span></p>
+      <hr>
+      <p><strong>毛保费公式:</strong></p>
+      <p style="color:#3d6b3d;">G × äx:n⌉ = Ax:n⌉ × S + α × S + β × G × äx:n⌉ + γ × S × äx:n⌉</p>
+      <p>→ <strong>G = (Ax:n⌉ × S + α × S + γ × S × äx:n⌉) / ((1 − β) × äx:n⌉)</strong></p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>2. 缴费频率 — m-thly Payments</h3>
+  <div class="mockup">
+    <div class="mockup-header">频率选择 + 公式</div>
+    <div class="mockup-body" style="padding:20px;font-family:monospace;font-size:13px;line-height:1.8;">
+      <p><strong>缴费频率:</strong> [月缴] [季缴] [半年缴] [年缴]</p>
+      <p>月缴 → m=12 | 季缴 → m=4 | 半年缴 → m=2 | 年缴 → m=1</p>
+      <hr>
+      <p><strong>精确转换公式 (UDD 假设):</strong></p>
+      <p style="color:#3d6b3d;">ä(m)x:n⌉ = α(m) × äx:n⌉ − β(m) × (1 − nEx)</p>
+      <p>α(m) = i / i(m) × d / d(m)</p>
+      <p>β(m) = (i − i(m)) / (i(m) × d(m))</p>
+      <p>i(m) = m × ((1+i)^(1/m) − 1)</p>
+      <p>d(m) = m × (1 − (1-d)^(1/m))</p>
+      <hr>
+      <p><strong>每期保费:</strong> P(m) = G ÷ m  (毛保费 ÷ 年缴费次数)</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>3. 结果面板 — 费用构成透明化</h3>
+  <div class="mockup">
+    <div class="mockup-header">用户看到的保费明细</div>
+    <div class="mockup-body" style="padding:20px;">
+      <div style="display:flex;gap:16px;margin-bottom:16px;">
+        <div style="flex:1;background:#faf7f2;border:1px solid #e5ded6;border-radius:10px;padding:16px;text-align:center;">
+          <p style="color:#8c8076;font-size:12px;">月缴保费</p>
+          <p style="font-size:28px;font-weight:700;color:#5b4636;">¥102.50</p>
+        </div>
+        <div style="flex:1;background:#f3faf3;border:1px solid #b8d4b8;border-radius:10px;padding:16px;text-align:center;">
+          <p style="color:#8c8076;font-size:12px;">其中纯风险保费</p>
+          <p style="font-size:20px;font-weight:700;color:#3d6b3d;">¥78.30</p>
+        </div>
+        <div style="flex:1;background:#fff8f0;border:1px solid #f0c888;border-radius:10px;padding:16px;text-align:center;">
+          <p style="color:#8c8076;font-size:12px;">费用附加</p>
+          <p style="font-size:20px;font-weight:700;color:#8b4513;">¥24.20</p>
+        </div>
+      </div>
+      <div class="placeholder" style="height:80px;display:flex;align-items:center;justify-content:center;background:#faf7f2;border-radius:6px;">
+        [费用构成横向堆叠柱状图：纯保费 vs α vs β vs γ]
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>4. 改动范围</h3>
+  <table style="width:100%;border-collapse:collapse;">
+    <tr style="border-bottom:1px solid #e5ded6;">
+      <th style="text-align:left;padding:8px;">文件</th><th style="text-align:left;padding:8px;">改动内容</th>
+    </tr>
+    <tr style="border-bottom:1px solid #e5ded6;">
+      <td style="padding:8px;">premium.py</td><td style="padding:8px;">加 m_thly_factor(), gross_premium(), pure_risk_premium() 三个函数</td>
+    </tr>
+    <tr style="border-bottom:1px solid #e5ded6;">
+      <td style="padding:8px;">pages/*.py (4个)</td><td style="padding:8px;">侧边栏加 α/β/γ 滑块 + 缴费频率 + 费用构成展示</td>
+    </tr>
+    <tr style="border-bottom:1px solid #e5ded6;">
+      <td style="padding:8px;">cli.py</td><td style="padding:8px;">加 --alpha --beta --gamma --freq 参数</td>
+    </tr>
+    <tr style="border-bottom:1px solid #e5ded6;">
+      <td style="padding:8px;">test_premium.py</td><td style="padding:8px;">加毛保费和缴费频率测试</td>
+    </tr>
+  </table>
+</div>
