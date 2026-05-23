@@ -57,3 +57,35 @@ class TestReserveTable:
         tbl = reserve_table(self.lt_m, 30, 1000000, 20, 0.035)
         assert tbl[0][1] == pytest.approx(0.0, abs=1e-6)
         assert tbl[-1][1] == pytest.approx(0.0, abs=1e-6)
+
+
+class TestWholeLifeReserve:
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.df = load_table(DATA_PATH)
+        self.lt_m = build_life_table(self.df, 'M')
+
+    def test_wl_reserve_starts_at_zero(self):
+        from reserve import whole_life_reserve_table
+        tbl = whole_life_reserve_table(self.lt_m, 30, 1000000, 0.035)
+        assert tbl[0][1] == pytest.approx(0.0, abs=1e-6)
+
+    def test_wl_reserve_increases_over_time(self):
+        from reserve import whole_life_reserve_table
+        tbl = whole_life_reserve_table(self.lt_m, 30, 1000000, 0.035)
+        r10 = [v for y, v in tbl if y == 10][0]
+        r30 = [v for y, v in tbl if y == 30][0]
+        assert r30 > r10
+
+
+class TestEndowmentReserve:
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.df = load_table(DATA_PATH)
+        self.lt_m = build_life_table(self.df, 'M')
+
+    def test_endow_reserve_ends_at_sum_insured(self):
+        from reserve import endowment_reserve_table
+        tbl = endowment_reserve_table(self.lt_m, 30, 1000000, 20, 0.035)
+        assert tbl[0][1] == pytest.approx(0.0, abs=1e-6)
+        assert tbl[-1][1] == pytest.approx(1000000, rel=1e-5)
