@@ -33,6 +33,11 @@ T = {
         'gender': '性别',
         'gender_male': '男',
         'gender_female': '女',
+        'risk_label': '核保等级',
+        'risk_preferred': '优选体 (Preferred)',
+        'risk_standard': '标准体 (Standard)',
+        'risk_substandard': '次标准体 (Substandard)',
+        'risk_hint': '健康、不吸烟 → 优选 | 吸烟/超重/慢性病 → 次标准',
         'error_age_term': '年龄 + 期限 ({age}+{term}={total}) 超过极限年龄 105',
         'single_premium': '趸缴纯保费',
         'single_premium_help': '一次性缴清的纯保费',
@@ -45,10 +50,10 @@ T = {
         'col_year': '保单年度',
         'col_reserve': '准备金（元）',
         'annuity_note': '生存年金无责任准备金',
-        'footer_term': '被保险人：{age} 岁 {gender} · 保额 ¥{sum:,} · 期限 {term} 年 · 利率 {rate:.1%}',
-        'footer_wl': '被保险人：{age} 岁 {gender} · 保额 ¥{sum:,} · 终身 · 利率 {rate:.1%}',
-        'footer_annuity': '被保险人：{age} 岁 {gender} · 年领 ¥{sum:,} · 期限 {term} 年 · 利率 {rate:.1%}',
-        'footer_endow': '被保险人：{age} 岁 {gender} · 保额 ¥{sum:,} · 期限 {term} 年 · 利率 {rate:.1%} · 到期返还',
+        'footer_term': '被保险人：{age} 岁 {gender} · 保额 ¥{sum:,} · 期限 {term} 年 · 利率 {rate:.1%} · {risk}',
+        'footer_wl': '被保险人：{age} 岁 {gender} · 保额 ¥{sum:,} · 终身 · 利率 {rate:.1%} · {risk}',
+        'footer_annuity': '被保险人：{age} 岁 {gender} · 年领 ¥{sum:,} · 期限 {term} 年 · 利率 {rate:.1%} · {risk}',
+        'footer_endow': '被保险人：{age} 岁 {gender} · 保额 ¥{sum:,} · 期限 {term} 年 · 利率 {rate:.1%} · 到期返还 · {risk}',
     },
     'en': {
         'page_title': 'Life Insurance Calculator',
@@ -69,6 +74,11 @@ T = {
         'gender': 'Gender',
         'gender_male': 'Male',
         'gender_female': 'Female',
+        'risk_label': 'Underwriting Class',
+        'risk_preferred': 'Preferred (Non-smoker, healthy)',
+        'risk_standard': 'Standard',
+        'risk_substandard': 'Substandard (Smoker, elevated risk)',
+        'risk_hint': 'Healthy, non-smoker → Preferred | Smoker, chronic conditions → Substandard',
         'error_age_term': 'Age + Term ({age}+{term}={total}) exceeds limit age 105',
         'single_premium': 'Net Single Premium',
         'single_premium_help': 'One-time lump-sum premium',
@@ -81,10 +91,10 @@ T = {
         'col_year': 'Policy Year',
         'col_reserve': 'Reserve (¥)',
         'annuity_note': 'Life annuities have no policy reserves',
-        'footer_term': 'Insured: Age {age} {gender} · Sum Insured ¥{sum:,} · Term {term} yrs · Rate {rate:.1%}',
-        'footer_wl': 'Insured: Age {age} {gender} · Sum Insured ¥{sum:,} · Whole Life · Rate {rate:.1%}',
-        'footer_annuity': 'Insured: Age {age} {gender} · Annual ¥{sum:,} · Term {term} yrs · Rate {rate:.1%}',
-        'footer_endow': 'Insured: Age {age} {gender} · Sum Insured ¥{sum:,} · Term {term} yrs · Rate {rate:.1%} · Endowment',
+        'footer_term': 'Insured: Age {age} {gender} · Sum Insured ¥{sum:,} · Term {term} yrs · Rate {rate:.1%} · {risk}',
+        'footer_wl': 'Insured: Age {age} {gender} · Sum Insured ¥{sum:,} · Whole Life · Rate {rate:.1%} · {risk}',
+        'footer_annuity': 'Insured: Age {age} {gender} · Annual ¥{sum:,} · Term {term} yrs · Rate {rate:.1%} · {risk}',
+        'footer_endow': 'Insured: Age {age} {gender} · Sum Insured ¥{sum:,} · Term {term} yrs · Rate {rate:.1%} · Endowment · {risk}',
     },
 }
 
@@ -155,6 +165,19 @@ gender_label = st.sidebar.radio(
 )
 gender_code = 'M' if gender_label == t('gender_male') else 'F'
 
+risk_label = st.sidebar.radio(
+    t('risk_label'),
+    [t('risk_preferred'), t('risk_standard'), t('risk_substandard')],
+    horizontal=True,
+)
+risk_map = {
+    t('risk_preferred'): 0.7,
+    t('risk_standard'): 1.0,
+    t('risk_substandard'): 2.0,
+}
+risk_factor = risk_map[risk_label]
+st.sidebar.caption(t('risk_hint'))
+
 # Validate
 if product != t('product_whole_life') and age + term > 105:
     st.sidebar.error(t('error_age_term', age=age, term=term, total=age + term))
@@ -162,11 +185,11 @@ if product != t('product_whole_life') and age + term > 105:
 
 # ---- Calculate ----
 @st.cache_data
-def get_life_table(gender_code):
+def get_life_table(gender_code, risk_factor):
     df = load_table(DATA_PATH)
-    return build_life_table(df, gender_code)
+    return build_life_table(df, gender_code, risk_factor=risk_factor)
 
-lt = get_life_table(gender_code)
+lt = get_life_table(gender_code, risk_factor)
 
 # Dispatch by product
 if product == t('product_whole_life'):
@@ -216,4 +239,4 @@ else:
 
 # ---- Footer ----
 st.divider()
-st.caption(t(footer_key, age=age, gender=gender_label, sum=sum_insured, term=term, rate=rate))
+st.caption(t(footer_key, age=age, gender=gender_label, sum=sum_insured, term=term, rate=rate, risk=risk_label))

@@ -30,8 +30,11 @@ def get_qx(df, age, gender):
     return float(row[col].iloc[0])
 
 
-def build_life_table(df, gender):
+def build_life_table(df, gender, risk_factor=1.0):
     """Build full life table: lx, dx, tpx from qx for given gender.
+
+    Parameters:
+        risk_factor: multiplier on qx. 0.7 = preferred (healthier), 1.0 = standard, 2.0 = substandard.
 
     Returns DataFrame with columns: age, qx, lx, dx, tpx
     - lx: number alive at exact age x (radix = 100,000)
@@ -40,7 +43,8 @@ def build_life_table(df, gender):
     """
     col = 'qx_male' if gender == 'M' else 'qx_female'
     ages = df['age'].values
-    qx = df[col].values
+    qx = df[col].values * risk_factor
+    qx = np.clip(qx, 0.0, 1.0)  # cap at 1.0
 
     lx = np.zeros(len(ages))
     lx[0] = RADIX

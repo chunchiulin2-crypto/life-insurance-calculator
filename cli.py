@@ -21,6 +21,12 @@ PRODUCTS = {
     'endowment': '两全保险',
 }
 
+RISK_CLASSES = {
+    'preferred': {'label': '优选体 (Preferred)', 'factor': 0.7},
+    'standard': {'label': '标准体 (Standard)', 'factor': 1.0},
+    'substandard': {'label': '次标准体 (Substandard)', 'factor': 2.0},
+}
+
 
 def parse_args():
     p = argparse.ArgumentParser(
@@ -41,6 +47,8 @@ Examples:
     p.add_argument('--gender', choices=['M', 'F'], default='M', help='性别 M/F (默认: M)')
     p.add_argument('--product', choices=list(PRODUCTS.keys()), default='term',
                    help=f'产品类型: {", ".join(f"{k}={v}" for k, v in PRODUCTS.items())} (默认: term)')
+    p.add_argument('--risk', choices=list(RISK_CLASSES.keys()), default='standard',
+                   help='核保等级: preferred(优选)/standard(标准)/substandard(次标准) (默认: standard)')
     return p.parse_args()
 
 
@@ -92,11 +100,13 @@ def main():
     if args.product != 'whole_life':
         print(f'  保险期限:      {args.term} 年')
     print(f'  预定利率:      {args.rate:.2%}')
+    risk = RISK_CLASSES[args.risk]
+    print(f'  核保等级:      {risk["label"]} (qx × {risk["factor"]})')
     print(f'  生命表:        CLT 2010-2013 (非养老类)')
     print()
 
     df = load_table(DATA_PATH)
-    lt = build_life_table(df, args.gender)
+    lt = build_life_table(df, args.gender, risk_factor=risk['factor'])
 
     # Dispatch by product
     if args.product == 'whole_life':
