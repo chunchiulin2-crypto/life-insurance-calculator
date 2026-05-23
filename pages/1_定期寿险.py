@@ -21,6 +21,10 @@ T = {
         'payment_label': '赔付时点',
         'pay_eoy': '死亡年末付款', 'pay_imm': '死亡立即付款 (UDD)',
         'pay_hint': '立即付款 = (1+i)^0.5 × 年末付款',
+        'advanced_options': '高级选项（核保 · 费用 · 缴费方式）',
+        'uw_section': '核保与赔付',
+        'expense_section': '费用参数',
+        'freq_section': '缴费方式',
         'expense_alpha': 'α 获取费 (% × 保额)',
         'expense_beta': 'β 维持费 (% × 保费)',
         'expense_gamma': 'γ 收费费 (‰ × 保额)',
@@ -44,6 +48,10 @@ T = {
         'payment_label': 'Death Benefit Timing',
         'pay_eoy': 'End of Year of Death', 'pay_imm': 'Immediate on Death (UDD)',
         'pay_hint': 'Immediate = (1+i)^0.5 × End-of-Year',
+        'advanced_options': 'Advanced Options (UW · Expenses · Frequency)',
+        'uw_section': 'Underwriting & Payment',
+        'expense_section': 'Expense Parameters',
+        'freq_section': 'Payment Method',
         'expense_alpha': 'α Acquisition (% × Sum Insured)',
         'expense_beta': 'β Maintenance (% × Premium)',
         'expense_gamma': 'γ Collection (‰ × Sum Insured)',
@@ -72,41 +80,42 @@ st.set_page_config(page_title=t('title'), page_icon='🏠', layout='wide')
 st.title(t('title'))
 st.caption(t('caption'))
 
-# Sidebar
+# Sidebar — Basic Parameters
 age = st.sidebar.slider(t('age'), 0, 80, 30)
+gender = st.sidebar.radio(t('gender'), [t('gender_m'), t('gender_f')], horizontal=True)
+gender_code = 'M' if gender == t('gender_m') else 'F'
 sum_insured = st.sidebar.number_input(t('sum'), 10000, 100000000, 1000000, 10000, format='%d')
 term = st.sidebar.slider(t('term'), 1, 50, 20)
 rate = st.sidebar.slider(t('rate'), 0.0, 10.0, 3.5, 0.5) / 100
-gender = st.sidebar.radio(t('gender'), [t('gender_m'), t('gender_f')], horizontal=True)
-gender_code = 'M' if gender == t('gender_m') else 'F'
-
-risk_label = st.sidebar.radio(t('risk_label'), [t('risk_pref'), t('risk_std'), t('risk_sub')], horizontal=True)
-risk_map = {t('risk_pref'): 0.7, t('risk_std'): 1.0, t('risk_sub'): 2.0}
-st.sidebar.caption(t('risk_hint'))
-
-pay_label = st.sidebar.radio(t('payment_label'), [t('pay_eoy'), t('pay_imm')], horizontal=True)
-claim_accel = (pay_label == t('pay_imm'))
-st.sidebar.caption(t('pay_hint'))
-
-# Expense parameters
-st.sidebar.divider()
-alpha = st.sidebar.slider(t('expense_alpha'), 0.0, 15.0, 5.0, 0.5) / 100
-beta  = st.sidebar.slider(t('expense_beta'), 0.0, 10.0, 2.0, 0.5) / 100
-gamma = st.sidebar.slider(t('expense_gamma'), 0.0, 5.0, 0.5, 0.1) / 1000
-st.sidebar.caption(t('expense_formula'))
-
-# Payment frequency
-freq_label = st.sidebar.radio(
-    t('freq_label'),
-    [t('freq_annual'), t('freq_semi'), t('freq_quarterly'), t('freq_monthly')],
-    horizontal=True,
-)
-freq_map = {t('freq_annual'): 1, t('freq_semi'): 2, t('freq_quarterly'): 4, t('freq_monthly'): 12}
-freq_m = freq_map[freq_label]
 
 if age + term > 105:
     st.sidebar.error(f'Age + Term = {age + term} exceeds limit age 105')
     st.stop()
+
+# Sidebar — Advanced Options (collapsed by default)
+with st.sidebar.expander(t('advanced_options'), expanded=False):
+    st.caption(t('uw_section'))
+    risk_label = st.radio(t('risk_label'), [t('risk_pref'), t('risk_std'), t('risk_sub')], horizontal=True)
+    pay_label = st.radio(t('payment_label'), [t('pay_eoy'), t('pay_imm')], horizontal=True)
+
+    st.divider()
+    st.caption(t('expense_section'))
+    alpha = st.slider(t('expense_alpha'), 0.0, 15.0, 5.0, 0.5) / 100
+    beta  = st.slider(t('expense_beta'), 0.0, 10.0, 2.0, 0.5) / 100
+    gamma = st.slider(t('expense_gamma'), 0.0, 5.0, 0.5, 0.1) / 1000
+
+    st.divider()
+    st.caption(t('freq_section'))
+    freq_label = st.radio(
+        t('freq_label'),
+        [t('freq_annual'), t('freq_semi'), t('freq_quarterly'), t('freq_monthly')],
+        horizontal=True,
+    )
+
+risk_map = {t('risk_pref'): 0.7, t('risk_std'): 1.0, t('risk_sub'): 2.0}
+claim_accel = (pay_label == t('pay_imm'))
+freq_map = {t('freq_annual'): 1, t('freq_semi'): 2, t('freq_quarterly'): 4, t('freq_monthly'): 12}
+freq_m = freq_map[freq_label]
 
 # Calculate
 from premium import gross_annual_premium, periodic_premium, annual_premium as net_ap
