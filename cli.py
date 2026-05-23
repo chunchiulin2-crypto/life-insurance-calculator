@@ -13,7 +13,8 @@ from premium import (single_premium, annual_premium,
 from reserve import reserve_table, whole_life_reserve_table, endowment_reserve_table
 
 DATA_PATH = os.path.join(os.path.dirname(__file__), 'data', 'clt_2010_2013.csv')
-LIMIT_AGE = 105
+AM92_PATH = os.path.join(os.path.dirname(__file__), 'data', 'am92.csv')
+LIMIT_AGE = 120
 
 PRODUCTS = {
     'term': '定期寿险',
@@ -26,6 +27,13 @@ RISK_CLASSES = {
     'preferred': {'label': '优选体 (Preferred)', 'factor': 0.7},
     'standard': {'label': '标准体 (Standard)', 'factor': 1.0},
     'substandard': {'label': '次标准体 (Substandard)', 'factor': 2.0},
+}
+
+TABLES = {
+    'clt': {'label': 'CLT 2010-2013', 'path': DATA_PATH, 'gender_based': True},
+    'am92ult': {'label': 'AM92 Ultimate', 'path': AM92_PATH, 'gender_based': False},
+    'am92sel': {'label': 'AM92 Select', 'path': AM92_PATH, 'gender_based': False},
+    'am92sel_plusone': {'label': 'AM92 Select+1', 'path': AM92_PATH, 'gender_based': False},
 }
 
 
@@ -50,6 +58,8 @@ Examples:
                    help=f'产品类型: {", ".join(f"{k}={v}" for k, v in PRODUCTS.items())} (默认: term)')
     p.add_argument('--risk', choices=list(RISK_CLASSES.keys()), default='standard',
                    help='核保等级: preferred(优选)/standard(标准)/substandard(次标准) (默认: standard)')
+    p.add_argument('--table', choices=list(TABLES.keys()), default='clt',
+                   help=f'生命表: {", ".join(f"{k}={v["label"]}" for k, v in TABLES.items())} (默认: clt)')
     p.add_argument('--claim-accel', action='store_true', default=False,
                    help='死亡立即付款 (默认: 年末付款, UDD假设下立即付款 = (1+i)^0.5 × 年末付款)')
     p.add_argument('--alpha', type=float, default=0.0, help='获取费 (× 保额, 默认 0)')
@@ -116,11 +126,13 @@ def main():
     if args.alpha > 0 or args.beta > 0 or args.gamma > 0:
         print(f'  费用参数:      α={args.alpha:.3f} β={args.beta:.3f} γ={args.gamma:.4f}')
     print(f'  缴费频率:      {freq_names[args.freq]} (m={args.freq})')
-    print(f'  生命表:        CLT 2010-2013 (非养老类)')
+    table_info = TABLES[args.table]
+    print(f'  生命表:        {table_info["label"]}')
     print()
 
-    df = load_table(DATA_PATH)
-    lt = build_life_table(df, args.gender, risk_factor=risk['factor'])
+    df = load_table(table_info['path'])
+    col = args.gender if table_info['gender_based'] else args.table
+    lt = build_life_table(df, col, risk_factor=risk['factor'])
     ca = args.claim_accel
 
     # Dispatch by product — use gross premium functions

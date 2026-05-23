@@ -4,7 +4,7 @@ import os
 
 DATA_PATH = os.path.join(os.path.dirname(__file__), 'data', 'clt_2010_2013.csv')
 
-from mortality import load_table, get_qx, build_life_table
+from mortality import load_table, resolve_column, build_life_table
 
 
 class TestLoadTable:
@@ -19,32 +19,22 @@ class TestLoadTable:
             load_table('nonexistent.csv')
 
 
-class TestGetQx:
+class TestResolveColumn:
     @pytest.fixture(autouse=True)
     def setup(self):
         self.df = load_table(DATA_PATH)
 
-    def test_male_age_30(self):
-        qx = get_qx(self.df, 30, 'M')
-        assert qx == pytest.approx(0.000623, abs=1e-6)
+    def test_male_column(self):
+        col = resolve_column(self.df, 'M')
+        assert col == 'qx_male'
 
-    def test_female_age_30(self):
-        qx = get_qx(self.df, 30, 'F')
-        assert qx == pytest.approx(0.000486, abs=1e-6)
+    def test_female_column(self):
+        col = resolve_column(self.df, 'F')
+        assert col == 'qx_female'
 
-    def test_age_105_death_certain(self):
-        qx_m = get_qx(self.df, 105, 'M')
-        qx_f = get_qx(self.df, 105, 'F')
-        assert qx_m == 1.0
-        assert qx_f == 1.0
-
-    def test_invalid_gender(self):
-        with pytest.raises(ValueError, match='gender'):
-            get_qx(self.df, 30, 'X')
-
-    def test_age_out_of_range(self):
-        with pytest.raises(ValueError, match='age'):
-            get_qx(self.df, 106, 'M')
+    def test_invalid_column(self):
+        with pytest.raises(ValueError):
+            resolve_column(self.df, 'X')
 
 
 class TestBuildLifeTable:
