@@ -210,3 +210,33 @@ class TestGrossPremium:
         monthly = periodic_premium(gap, 12)
         assert monthly == pytest.approx(gap / 12, rel=1e-6)
         assert monthly * 12 == pytest.approx(gap, rel=1e-6)
+
+
+class TestDeferredAnnuity:
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.df = load_table(DATA_PATH)
+        self.lt_m = build_life_table(self.df, 'M')
+
+    def test_premium_positive(self):
+        from premium import deferred_annuity_premium
+        ap = deferred_annuity_premium(self.lt_m, 25, 35, 50000, 0.035)
+        assert ap > 0
+
+    def test_longer_defer_lower_premium(self):
+        from premium import deferred_annuity_premium
+        p15 = deferred_annuity_premium(self.lt_m, 25, 15, 50000, 0.035)
+        p35 = deferred_annuity_premium(self.lt_m, 25, 35, 50000, 0.035)
+        assert p35 < p15  # longer accumulation = more time for interest = lower annual premium
+
+    def test_lump_sum_equals_pv_of_premiums(self):
+        from premium import deferred_annuity_premium, deferred_annuity_lump_sum, annuity_due
+        ap = deferred_annuity_premium(self.lt_m, 25, 35, 50000, 0.035)
+        lump = deferred_annuity_lump_sum(self.lt_m, 25, 35, 50000, 0.035)
+        a = annuity_due(self.lt_m, 25, 35, 0.035)
+        assert lump == pytest.approx(ap * a, rel=1e-5)
+
+    def test_lump_sum_positive(self):
+        from premium import deferred_annuity_lump_sum
+        lump = deferred_annuity_lump_sum(self.lt_m, 25, 35, 50000, 0.035)
+        assert lump > 0
