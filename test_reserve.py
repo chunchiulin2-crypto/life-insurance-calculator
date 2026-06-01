@@ -89,3 +89,83 @@ class TestEndowmentReserve:
         tbl = endowment_reserve_table(self.lt_m, 30, 1000000, 20, 0.035)
         assert tbl[0][1] == pytest.approx(0.0, abs=1e-6)
         assert tbl[-1][1] == pytest.approx(1000000, rel=1e-5)
+
+
+class TestAnnuityReserve:
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.df = load_table(DATA_PATH)
+        self.lt_m = build_life_table(self.df, 'M')
+
+    def test_annuity_reserve_starts_at_price(self):
+        from reserve import annuity_reserve_table
+        from premium import annuity_price
+        price = annuity_price(self.lt_m, 30, 100000, 20, 0.035)
+        tbl = annuity_reserve_table(self.lt_m, 30, 100000, 20, 0.035)
+        assert tbl[0][1] == pytest.approx(price, rel=1e-5)
+
+    def test_annuity_reserve_ends_at_zero(self):
+        from reserve import annuity_reserve_table
+        tbl = annuity_reserve_table(self.lt_m, 30, 100000, 20, 0.035)
+        assert tbl[-1][1] == pytest.approx(0.0, abs=1e-6)
+
+    def test_annuity_reserve_decreases(self):
+        from reserve import annuity_reserve_table
+        tbl = annuity_reserve_table(self.lt_m, 30, 100000, 20, 0.035)
+        r5 = [v for y, v in tbl if y == 5][0]
+        r10 = [v for y, v in tbl if y == 10][0]
+        assert r10 < r5  # liability decreases as payments are made
+
+
+class TestDeferredAssuranceReserve:
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.df = load_table(DATA_PATH)
+        self.lt_m = build_life_table(self.df, 'M')
+
+    def test_def_assurance_starts_at_zero(self):
+        from reserve import deferred_assurance_reserve_table
+        tbl = deferred_assurance_reserve_table(self.lt_m, 30, 10, 1000000, 0.035, coverage=15)
+        assert tbl[0][1] == pytest.approx(0.0, abs=1e-6)
+
+    def test_def_assurance_reserve_positive_during_deferral(self):
+        from reserve import deferred_assurance_reserve_table
+        tbl = deferred_assurance_reserve_table(self.lt_m, 30, 10, 1000000, 0.035, coverage=15)
+        r5 = [v for y, v in tbl if y == 5][0]
+        assert r5 > 0  # reserve builds up from premiums
+
+    def test_def_assurance_term_ends_at_zero(self):
+        from reserve import deferred_assurance_reserve_table
+        tbl = deferred_assurance_reserve_table(self.lt_m, 30, 5, 1000000, 0.035, coverage=10)
+        assert tbl[-1][1] == pytest.approx(0.0, abs=1e-6)
+
+    def test_def_assurance_whole_life_increasing(self):
+        from reserve import deferred_assurance_reserve_table
+        tbl = deferred_assurance_reserve_table(self.lt_m, 30, 10, 1000000, 0.035, coverage=None)
+        r_at_def = [v for y, v in tbl if y == 10][0]
+        r_later = [v for y, v in tbl if y == 30][0]
+        assert r_later > r_at_def
+
+
+class TestPureEndowmentReserve:
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.df = load_table(DATA_PATH)
+        self.lt_m = build_life_table(self.df, 'M')
+
+    def test_pe_reserve_starts_at_zero(self):
+        from reserve import pure_endowment_reserve_table
+        tbl = pure_endowment_reserve_table(self.lt_m, 30, 1000000, 20, 0.035)
+        assert tbl[0][1] == pytest.approx(0.0, abs=1e-6)
+
+    def test_pe_reserve_ends_at_sum_insured(self):
+        from reserve import pure_endowment_reserve_table
+        tbl = pure_endowment_reserve_table(self.lt_m, 30, 1000000, 20, 0.035)
+        assert tbl[-1][1] == pytest.approx(1000000, rel=1e-5)
+
+    def test_pe_reserve_monotonically_increasing(self):
+        from reserve import pure_endowment_reserve_table
+        tbl = pure_endowment_reserve_table(self.lt_m, 30, 1000000, 20, 0.035)
+        values = [v for y, v in tbl]
+        for i in range(1, len(values)):
+            assert values[i] >= values[i-1] - 1e-9

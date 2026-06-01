@@ -1,12 +1,30 @@
 """Life table loading, querying, and construction (CLT 2010-2013 + AM92)."""
 
+import os
 import pandas as pd
 import numpy as np
 
 LIMIT_AGE = 120
 RADIX = 100000
 
+# Ensure session state defaults exist for Streamlit deep-link navigation
+try:
+    import streamlit as st
+    if 'table_col' not in st.session_state:
+        st.session_state.table_col = 'clt'
+    if 'table_path' not in st.session_state:
+        st.session_state.table_path = os.path.join(
+            os.path.dirname(__file__), 'data', 'clt_2010_2013.csv'
+        )
+except ImportError:
+    pass  # CLI / pytest — streamlit not available, skip
+
 AM92_COLUMNS = ['qx_am92ult', 'qx_am92sel', 'qx_am92sel_plusone']
+
+
+def table_max_age(table_col):
+    """Return the maximum insurable age for the given life table column."""
+    return 120 if table_col.startswith('am92') else 105
 
 
 def load_table(path):
