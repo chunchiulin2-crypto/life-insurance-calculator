@@ -170,7 +170,10 @@ T = {
 
 
 def t(key, **kw):
-    text = T[st.session_state.lang][key]
+    lang = st.session_state.get('lang', 'zh')
+    if lang not in T or key not in T.get(lang, {}):
+        lang = 'zh'
+    text = T[lang][key]
     return text.format(**kw) if kw else text
 
 CURRENT_PAGE = 'endowment'

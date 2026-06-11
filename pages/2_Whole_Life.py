@@ -110,6 +110,19 @@ T = {
         'nav_def_assurance': 'Deferred Assurance', 'nav_pure_endow': 'Pure Endowment',
         'help_per_payment': 'Per-payment amount · Gross annual {gap}',
         'caption_summary': '{freq} payment · Loading +{extra} (α/β/γ) · Cover to age {max_age}',
+        'ml_source_label': 'Mortality Source', 'ml_source_traditional': 'Traditional', 'ml_source_ai': 'AI Predict',
+        'ml_source_help': 'AI: age/gender/smoking/BMI/exercise/income',
+        'ml_smoker': 'Smoking', 'ml_bmi': 'BMI', 'ml_exercise': 'Exercise', 'ml_exercise_low': 'Low', 'ml_exercise_mid': 'Mid', 'ml_exercise_high': 'High',
+        'ml_income': 'Income', 'ml_income_low': 'Low', 'ml_income_mid': 'Mid', 'ml_income_high': 'High',
+        'ml_ai_note': 'AI via GradientBoosting, MAE<0.002, R²>0.99', 'ml_vs_traditional': 'AI vs Traditional',
+        'uw_ai_label': 'Underwriting', 'uw_ai_manual': 'Manual', 'uw_ai_auto': 'AI Assess',
+        'uw_ai_help': 'AI auto-assesses risk from health data',
+        'uw_bmi_label': 'BMI', 'uw_bp_label': 'BP (Sys/Dia)', 'uw_cholesterol': 'Cholesterol (mg/dL)',
+        'uw_family_history': 'Family Early Death', 'uw_exercise': 'Exercise', 'uw_alcohol': 'Alcohol',
+        'uw_alcohol_none': 'None', 'uw_alcohol_moderate': 'Moderate', 'uw_alcohol_heavy': 'Heavy',
+        'uw_occupation': 'Occupation Risk', 'uw_occ_desk': 'Desk', 'uw_occ_manual': 'Manual', 'uw_occ_hazard': 'Hazardous',
+        'uw_chronic': 'Chronic Conditions', 'uw_result_risk': 'Risk Factor', 'uw_result_class': 'UW Class', 'uw_result_mult': 'Rate Multiplier',
+        'uw_class_pref_plus': 'Preferred+', 'uw_class_standard': 'Standard', 'uw_class_substandard': 'Substandard', 'uw_class_decline': 'Decline',
     },
     'zh-Hant': {
         'title': '終身壽險 · Whole Life',
@@ -140,12 +153,45 @@ T = {
         'nav_def_assurance': '遞延壽險', 'nav_pure_endow': '純生存保險',
         'help_per_payment': '每期保費 · 年毛保費 {gap}',
         'caption_summary': '{freq}繳納 · 費用附加 +{extra}（α/β/γ）· 保障至 {max_age} 歲',
+        'ml_source_label': '死亡率來源', 'ml_source_traditional': '傳統生命表', 'ml_source_ai': 'AI 預測',
+        'ml_source_help': 'AI 模型基於年齡/性別/吸煙/BMI/運動/收入預測死亡率',
+        'ml_smoker': '吸煙', 'ml_bmi': 'BMI', 'ml_exercise': '運動', 'ml_exercise_low': '少', 'ml_exercise_mid': '中', 'ml_exercise_high': '多',
+        'ml_income': '收入', 'ml_income_low': '低', 'ml_income_mid': '中', 'ml_income_high': '高',
+        'ml_ai_note': 'AI 基於 GradientBoosting 預測，MAE<0.002，R²>0.99', 'ml_vs_traditional': 'AI 預測 vs 傳統生命表',
+        'uw_result_risk': '风险因子',
+        'uw_result_mult': '风险倍数',
+        'uw_result_class': '核保等级',
+        'uw_occupation': '职业',
+        'uw_occ_manual': '体力',
+        'uw_occ_hazard': '高危',
+        'uw_occ_desk': '久坐',
+        'uw_family_history': '家族病史',
+        'uw_exercise': '运动频率',
+        'uw_class_substandard': '次标准体',
+        'uw_class_standard': '标准体',
+        'uw_class_pref_plus': '优选体+',
+        'uw_class_decline': '拒保',
+        'uw_chronic': '慢性病史',
+        'uw_cholesterol': '胆固醇',
+        'uw_bp_label': '血压',
+        'uw_bmi_label': 'BMI',
+        'uw_alcohol_none': '无',
+        'uw_alcohol_moderate': '中',
+        'uw_alcohol_heavy': '重',
+        'uw_alcohol': '饮酒',
+        'uw_ai_manual': '手动输入',
+        'uw_ai_label': 'AI 智能核保',
+        'uw_ai_help': '基于11维健康特征预测风险因子',
+        'uw_ai_auto': 'AI 自动评估',
     },
 }
 
 
 def t(key, **kw):
-    text = T[st.session_state.lang][key]
+    lang = st.session_state.get('lang', 'zh')
+    if lang not in T or key not in T.get(lang, {}):
+        lang = 'zh'
+    text = T[lang][key]
     return text.format(**kw) if kw else text
 
 CURRENT_PAGE = 'whole_life'

@@ -35,6 +35,10 @@ T = {
         'nav_annuity': '生存年金', 'nav_endowment': '两全保险', 'nav_def_annuity': '递延年金',
         'nav_def_assurance': '递延寿险', 'nav_pure_endow': '纯生存保险',
         'help_annual': '年领总额 ¥{annual} · 分{m}次',
+        'reserve_curve': 'Reserve Curve',
+        'survival_curve': 'Survival Probability',
+        'deferral_vs_coverage': 'Deferral vs Coverage',
+        'survival_to_maturity': 'Survival to Maturity',
         'caption_summary': '趸缴 ≈ 年领金额 × {ratio} 倍 · 共领 {term} 年 · 每次 ¥{per}',
         'ml_source_label': '死亡率来源', 'ml_source_traditional': '传统生命表', 'ml_source_ai': 'AI 预测',
         'ml_source_help': 'AI 模型基于年龄/性别/吸烟/BMI/运动/收入预测死亡率',
@@ -66,6 +70,10 @@ T = {
         'nav_annuity': 'Life Annuity', 'nav_endowment': 'Endowment', 'nav_def_annuity': 'Deferred Annuity',
         'nav_def_assurance': 'Deferred Assurance', 'nav_pure_endow': 'Pure Endowment',
         'help_annual': 'Annual total ¥{annual} · {m} payments/year',
+        'reserve_curve': 'Reserve Curve',
+        'survival_curve': 'Survival Probability',
+        'deferral_vs_coverage': 'Deferral vs Coverage',
+        'survival_to_maturity': 'Survival to Maturity',
         'caption_summary': 'Lump sum ≈ Annual × {ratio}× · {term}yr · ¥{per}/payment',
         'ml_source_label': 'Mortality Source', 'ml_source_traditional': 'Traditional Table', 'ml_source_ai': 'AI Prediction',
         'ml_source_help': 'ML model predicts qx from age/gender/smoking/BMI/exercise/income',
@@ -92,6 +100,10 @@ T = {
         'nav_annuity': '生存年金', 'nav_endowment': '兩全保險', 'nav_def_annuity': '遞延年金',
         'nav_def_assurance': '遞延壽險', 'nav_pure_endow': '純生存保險',
         'help_annual': '年領總額 ¥{annual} · 分{m}次',
+        'reserve_curve': 'Reserve Curve',
+        'survival_curve': 'Survival Probability',
+        'deferral_vs_coverage': 'Deferral vs Coverage',
+        'survival_to_maturity': 'Survival to Maturity',
         'caption_summary': '躉繳 ≈ 年領金額 × {ratio} 倍 · 共領 {term} 年 · 每次 ¥{per}',
         'ml_source_label': '死亡率來源', 'ml_source_traditional': '傳統生命表', 'ml_source_ai': 'AI 預測',
         'ml_source_help': 'AI 模型基於年齡/性別/吸菸/BMI/運動/收入預測死亡率',
@@ -103,7 +115,10 @@ T = {
 
 
 def t(key, **kw):
-    text = T[st.session_state.lang][key]
+    lang = st.session_state.get('lang', 'zh')
+    if lang not in T or key not in T.get(lang, {}):
+        lang = 'zh'
+    text = T[lang][key]
     return text.format(**kw) if kw else text
 
 CURRENT_PAGE = 'annuity'
@@ -214,14 +229,14 @@ with st.expander(t('formula_title'), expanded=False):
 # Reserve curve
 st.divider()
 with st.container(border=True):
-    st.subheader('准备金曲线 · Reserve Curve')
+    st.subheader(t('reserve_curve'))
     reserves = annuity_reserve_table(lt, age, annual_payment, term, rate, payout_m)
     df_r = pd.DataFrame(reserves, columns=['Year', 'Reserve']).set_index('Year')
     st.line_chart(df_r, height=300)
 
 # Survival probability curve
 with st.container(border=True):
-    st.subheader('生存概率曲线 · Survival Probability')
+    st.subheader(t('survival_curve'))
     x_idx = lt[lt['age'] == age].index[0]
     lx = lt.loc[x_idx, 'lx']
     surv_data = []

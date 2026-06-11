@@ -52,6 +52,10 @@ T = {
         'nav_home': '首页', 'nav_term': '定期寿险', 'nav_whole_life': '终身寿险',
         'nav_annuity': '生存年金', 'nav_endowment': '两全保险', 'nav_def_annuity': '递延年金',
         'nav_def_assurance': '递延寿险', 'nav_pure_endow': '纯生存保险',
+        'reserve_curve': 'Reserve Curve',
+        'survival_curve': 'Survival Probability',
+        'deferral_vs_coverage': 'Deferral vs Coverage',
+        'survival_to_maturity': 'Survival to Maturity',
         'caption_summary': '{freq}缴费 {defer} 年 · 年缴 ¥{ap} · {start} 岁起保障生效',
         'advanced_options': '高级选项（核保 · 赔付 · 缴费）',
         'uw_section': '核保与赔付',
@@ -111,6 +115,10 @@ T = {
         'nav_home': 'Home', 'nav_term': 'Term Life', 'nav_whole_life': 'Whole Life',
         'nav_annuity': 'Life Annuity', 'nav_endowment': 'Endowment', 'nav_def_annuity': 'Deferred Annuity',
         'nav_def_assurance': 'Deferred Assurance', 'nav_pure_endow': 'Pure Endowment',
+        'reserve_curve': 'Reserve Curve',
+        'survival_curve': 'Survival Probability',
+        'deferral_vs_coverage': 'Deferral vs Coverage',
+        'survival_to_maturity': 'Survival to Maturity',
         'caption_summary': '{freq} × {defer}yr · ¥{ap}/yr · Cover starts at age {start}',
         'advanced_options': 'Advanced Options (UW · Payment · Frequency)',
         'uw_section': 'UW & Payment',
@@ -155,6 +163,10 @@ T = {
         'nav_home': '首頁', 'nav_term': '定期壽險', 'nav_whole_life': '終身壽險',
         'nav_annuity': '生存年金', 'nav_endowment': '兩全保險', 'nav_def_annuity': '遞延年金',
         'nav_def_assurance': '遞延壽險', 'nav_pure_endow': '純生存保險',
+        'reserve_curve': 'Reserve Curve',
+        'survival_curve': 'Survival Probability',
+        'deferral_vs_coverage': 'Deferral vs Coverage',
+        'survival_to_maturity': 'Survival to Maturity',
         'caption_summary': '{freq}繳費 {defer} 年 · 年繳 ¥{ap} · {start} 歲起保障生效',
         'advanced_options': '進階選項（核保 · 給付 · 繳費）',
         'uw_section': '核保與給付',
@@ -180,7 +192,10 @@ T = {
 
 
 def t(key, **kw):
-    text = T[st.session_state.lang][key]
+    lang = st.session_state.get('lang', 'zh')
+    if lang not in T or key not in T.get(lang, {}):
+        lang = 'zh'
+    text = T[lang][key]
     return text.format(**kw) if kw else text
 
 CURRENT_PAGE = 'def_assurance'
@@ -370,7 +385,7 @@ with st.expander(t('formula_title'), expanded=False):
 st.divider()
 
 with st.container(border=True):
-    st.subheader('递延期 vs 保障期 · Deferral vs Coverage')
+    st.subheader(t('deferral_vs_coverage'))
     total_years = defer + (coverage if is_term else 30)
     timeline_data = pd.DataFrame({
         'Year': list(range(total_years)),
@@ -380,7 +395,7 @@ with st.container(border=True):
     st.bar_chart(timeline_data.set_index('Year')['Cash Flow'], height=200)
 
 with st.container(border=True):
-    st.subheader('准备金曲线 · Reserve Curve')
+    st.subheader(t('reserve_curve'))
     reserves = deferred_assurance_reserve_table(
         lt, age, defer, sum_insured, rate,
         coverage=coverage if is_term else None,

@@ -17,269 +17,252 @@ if 'table_path' not in st.session_state:
 
 st.markdown('''
 <style>
-/* === Apple-Style Global CSS === */
+/* === Actuarial Pro · Apple-Style === */
 
-/* System font stack */
+:root {
+    --bg: #f2f2f7;
+    --card: #ffffff;
+    --accent: #007AFF;
+    --accent-dim: rgba(0,122,255,0.08);
+    --text: #1d1d1f;
+    --text-secondary: #515154;
+    --muted: #86868b;
+    --border: rgba(0,0,0,0.06);
+    --border-strong: rgba(0,0,0,0.1);
+    --shadow-sm: 0 0.5px 1px rgba(0,0,0,0.04);
+    --shadow-md: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+    --radius-sm: 10px;
+    --radius: 14px;
+    --radius-lg: 18px;
+}
+
 html, body, [class*="css"] {
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "PingFang SC", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    letter-spacing: -0.01em;
+    font-size: 15px;
+    color: var(--text);
 }
 
-/* === Kill default Streamlit top padding === */
+/* Background — subtle mesh */
+.stApp {
+    background:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0,122,255,0.03), transparent),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(0,122,255,0.02), transparent),
+        linear-gradient(180deg, #fafafc 0%, #f2f2f7 40%, #eeeef3 100%);
+}
+
 #MainMenu { visibility: hidden; }
 footer { visibility: hidden; }
-[data-testid="stHeader"] { background: transparent !important; height: 2.5rem !important; }
-[data-testid="stAppViewContainer"] > .block-container {
-    padding-top: 0.5rem !important;
-    padding-bottom: 0 !important;
+[data-testid="stHeader"] { background: transparent !important; height: 2rem !important; }
+[data-testid="stAppViewContainer"] > .block-container { padding: 0 2rem 0 2rem !important; max-width: 1200px; }
+.block-container { max-width: 1200px; padding-left: 1.5rem !important; padding-right: 1.5rem !important; }
+
+/* ── Typography ── */
+h1 {
+    font-weight: 700 !important; font-size: 1.75rem !important;
+    letter-spacing: -0.03em !important; line-height: 1.15 !important;
+    color: var(--text) !important; margin-bottom: 0.25rem !important;
 }
-.stMain { padding-top: 0; }
+h2 { font-weight: 600 !important; font-size: 1.15rem !important; letter-spacing: -0.02em !important; color: var(--text) !important; }
+h3 { font-weight: 600 !important; font-size: 1rem !important; color: var(--text-secondary) !important; }
 
-/* === Typography === */
-h1 { font-weight: 700 !important; letter-spacing: -0.02em !important; font-size: 1.5rem !important; margin-top: 0 !important; }
-h2 { font-weight: 600 !important; letter-spacing: -0.01em !important; font-size: 1.1rem !important; }
-h3 { font-weight: 600 !important; font-size: 1rem !important; }
+/* Label style — uppercase tracking */
+label, .stSelectbox label, .stSlider label {
+    font-size: 0.7rem !important; font-weight: 600 !important;
+    color: var(--muted) !important; letter-spacing: 0.05em;
+    text-transform: uppercase !important;
+}
 
-/* === Sidebar === */
+/* ── Sidebar ── */
 [data-testid="stSidebar"] {
-    background: #FAFAFA;
-    border-right: 1px solid #E5E5EA !important;
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.06);
+    background: rgba(250,250,252,0.82);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border-right: 0.5px solid var(--border-strong) !important;
 }
-[data-testid="stSidebar"] .stSelectbox label,
-[data-testid="stSidebar"] .stSlider label,
-[data-testid="stSidebar"] .stRadio label {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #6E6E73;
-    text-transform: none;
-    letter-spacing: 0;
-    margin-bottom: 0;
+[data-testid="stSidebar"] .block-container { padding: 1.25rem 1rem !important; }
+[data-testid="stSidebar"] hr { margin: 0.75rem 0; border-color: var(--border); }
+[data-testid="stSidebar"] [data-testid="stExpander"] {
+    border-radius: var(--radius-sm); border: 0.5px solid var(--border);
+    background: rgba(255,255,255,0.6); margin-top: 0.5rem;
 }
-[data-testid="stSidebar"] hr {
-    margin: 0.5rem 0;
-    border-color: #E5E5EA;
-}
+/* Sidebar section headings */
+[data-testid="stSidebar"] .stMarkdown p { font-size: 0.7rem; font-weight: 600; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
 
-/* === Metric Cards === */
+/* ── Metric Cards ── */
 [data-testid="stMetric"] {
-    background: #FFFFFF;
-    border-radius: 14px;
-    padding: 1rem 1.25rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 8px rgba(0,0,0,0.02);
-    border: 0.5px solid #F0F0F2;
-    transition: box-shadow 0.2s ease;
+    background: var(--card);
+    border-radius: var(--radius-lg); padding: 1.25rem 1.5rem;
+    border: 0.5px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+    position: relative; overflow: hidden;
 }
 [data-testid="stMetric"]:hover {
-    box-shadow: 0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+    box-shadow: var(--shadow-lg); transform: translateY(-2px);
+    border-color: rgba(0,122,255,0.15);
 }
 [data-testid="stMetricLabel"] {
-    font-size: 0.75rem !important;
-    font-weight: 600 !important;
-    color: #6E6E73 !important;
-    letter-spacing: 0.02em;
-    text-transform: none;
+    font-size: 0.65rem !important; font-weight: 600 !important;
+    color: var(--muted) !important; letter-spacing: 0.08em;
+    text-transform: uppercase !important; margin-bottom: 0.25rem !important;
 }
 [data-testid="stMetricValue"] {
-    font-size: 1.5rem !important;
-    font-weight: 700 !important;
-    color: #1D1D1F !important;
-}
-[data-testid="stMetricDelta"] {
-    font-size: 0.8rem !important;
-}
-
-/* === Apple-Style Cards === */
-.apple-card {
-    background: #FFFFFF;
-    border-radius: 14px;
-    padding: 1.25rem 1.5rem;
-    border: 0.5px solid #F0F0F2;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 8px rgba(0,0,0,0.02);
-    transition: box-shadow 0.25s ease, transform 0.2s ease;
-    cursor: default;
-}
-.apple-card:hover {
-    box-shadow: 0 12px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
-    transform: translateY(-3px);
-}
-.apple-card h3 {
-    font-size: 1.05rem !important;
-    font-weight: 700 !important;
-    margin-bottom: 0.25rem;
-    color: #1D1D1F;
-}
-.apple-card p {
-    font-size: 0.82rem;
-    color: #86868B;
-    margin: 0;
-}
-
-/* === Charts === */
-[data-testid="stArrowVegaLiteChart"] {
-    background: #FFFFFF;
-    border-radius: 14px;
-    padding: 0.75rem;
-    border: 0.5px solid #F0F0F2;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
-}
-
-/* === DataFrames === */
-[data-testid="stDataFrame"] {
-    border-radius: 12px;
-    overflow: hidden;
-    border: 0.5px solid #E5E5EA;
-}
-
-/* === Info / Note boxes === */
-[data-testid="stNotification"] {
-    border-radius: 12px;
-    border: none;
-    background: #F5F5F7;
-    font-size: 0.85rem;
-    color: #6E6E73;
-}
-
-/* === Dividers === */
-hr {
-    border-color: #E5E5EA !important;
-    margin: 0.5rem 0 !important;
-}
-
-/* === Sidebar widgets === */
-[data-testid="stSidebar"] .st-bx { gap: 0.25rem; }
-[data-testid="stSidebar"] [data-testid="stExpander"] {
-    border: none;
-    border-radius: 12px;
-    background: #F5F5F7;
-    margin-top: 0.5rem;
-}
-
-/* === Sliders === */
-div[data-testid="stSlider"] div[role="slider"] {
-    background: #007AFF;
-    border: 2px solid #FFFFFF;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
-}
-
-/* === Radio buttons === */
-div[data-testid="stRadio"] label[data-baseweb="radio"] {
-    background: #F5F5F7;
-    border-radius: 10px;
-    padding: 0.15rem 0.6rem;
-    margin-right: 0.25rem;
-    font-size: 0.85rem;
-    transition: background 0.15s ease;
-}
-
-/* === Scrollbar (macOS thin style) === */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #C7C7CC; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #AEAEB2; }
-
-/* === Top header (keep minimal but visible for sidebar toggle) === */
-/* Reduce toolbar visual weight without hiding it */
-[data-testid="stToolbar"] {
-    opacity: 0.3;
-    transition: opacity 0.2s ease;
-}
-[data-testid="stToolbar"]:hover {
-    opacity: 0.8;
-}
-
-/* Deploy button — keep it subtle */
-[data-testid="stDeployButton"] {
-    font-size: 0.7rem !important;
-    opacity: 0.5;
-    transition: opacity 0.2s;
-}
-[data-testid="stDeployButton"]:hover {
-    opacity: 1;
-}
-
-/* === Captions / Footer text === */
-.stCaption { color: #AEAEB2 !important; font-size: 0.75rem !important; }
-
-/* === Subheader === */
-.stSubheader { font-weight: 600; letter-spacing: -0.01em; font-size: 1rem !important; }
-
-/* === Expander arrow fix === */
-[data-testid="stExpander"] svg { color: #86868B; }
-
-/* === Top bar widget labels — make them compact === */
-.col_lang_label, .col_table_label {
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: #86868B;
-    margin-bottom: 0;
-    line-height: 1;
-}
-
-/* === Metric Color Accent Bars === */
-[data-testid="stMetric"] {
-    position: relative;
-    overflow: hidden;
+    font-size: 1.75rem !important; font-weight: 700 !important;
+    color: var(--text) !important; letter-spacing: -0.02em;
+    font-feature-settings: "tnum"; font-variant-numeric: tabular-nums;
 }
 [data-testid="stMetric"]::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    border-radius: 3px 3px 0 0;
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--accent), rgba(0,122,255,0.2));
+    opacity: 0; transition: opacity 0.3s;
 }
-[data-testid="stColumn"]:nth-child(1) [data-testid="stMetric"]::before { background: #007AFF; }
-[data-testid="stColumn"]:nth-child(2) [data-testid="stMetric"]::before { background: #34C759; }
-[data-testid="stColumn"]:nth-child(3) [data-testid="stMetric"]::before { background: #FF9500; }
-[data-testid="stColumn"]:nth-child(4) [data-testid="stMetric"]::before { background: #AF52DE; }
+[data-testid="stMetric"]:hover::before { opacity: 1; }
 
-/* === Parameter Chips === */
+/* ── Cards ── */
+.apple-card {
+    background: var(--card);
+    border-radius: var(--radius-lg); padding: 1.5rem 1.75rem;
+    border: 0.5px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.apple-card:hover {
+    box-shadow: var(--shadow-lg); transform: translateY(-2px);
+    border-color: rgba(0,122,255,0.12);
+}
+.apple-card h3 { color: var(--text) !important; font-weight: 700 !important; font-size: 1.05rem !important; margin-bottom: 0.35rem; }
+.apple-card p { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; margin: 0; }
+
+/* ── Container borders ── */
+[data-testid="stExpander"] {
+    border: 0.5px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    background: rgba(255,255,255,0.6);
+}
+[data-testid="stExpander"] svg { color: var(--muted); }
+
+/* ── Charts ── */
+[data-testid="stArrowVegaLiteChart"] {
+    background: var(--card);
+    border-radius: var(--radius-lg); padding: 0.75rem;
+    border: 0.5px solid var(--border);
+    box-shadow: var(--shadow-sm);
+}
+
+/* ── Tables ── */
+[data-testid="stDataFrame"] {
+    border-radius: var(--radius-sm); overflow: hidden;
+    border: 0.5px solid var(--border-strong);
+}
+[data-testid="stDataFrame"] th {
+    background: #f9f9fb !important; padding: 0.5rem 0.75rem !important;
+    font-size: 0.68rem !important; font-weight: 600 !important;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--muted) !important; border-bottom: 1px solid var(--border) !important;
+}
+[data-testid="stDataFrame"] td {
+    padding: 0.4rem 0.75rem !important; font-size: 0.82rem !important;
+    color: var(--text) !important; border-bottom: 0.5px solid var(--border) !important;
+    font-feature-settings: "tnum"; font-variant-numeric: tabular-nums;
+}
+[data-testid="stDataFrame"] tr:hover td { background: rgba(0,122,255,0.03); }
+
+/* ── Widgets ── */
+.stSelectbox > div { border-radius: var(--radius-sm) !important; border-color: var(--border-strong) !important; box-shadow: var(--shadow-sm) !important; }
+.stSelectbox > div:focus-within { border-color: var(--accent) !important; box-shadow: 0 0 0 3px var(--accent-dim) !important; }
+
+.stSlider > div { padding-top: 0.25rem; }
+div[data-testid="stSlider"] div[role="slider"] {
+    background: var(--accent); border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,122,255,0.3); width: 16px; height: 16px;
+}
+
+div[data-testid="stRadio"] label[data-baseweb="radio"] {
+    background: rgba(0,0,0,0.03); border-radius: 8px;
+    padding: 0.25rem 0.75rem; font-size: 0.8rem;
+    transition: background 0.15s;
+}
+div[data-testid="stRadio"] label[data-baseweb="radio"]:has(input:checked) {
+    background: var(--accent-dim); color: var(--accent);
+}
+
+/* ── Buttons ── */
+.stButton button {
+    background: var(--accent); color: #fff; border: none;
+    border-radius: 100px; font-weight: 600; font-size: 0.85rem;
+    padding: 0.55rem 1.75rem;
+    box-shadow: 0 2px 8px rgba(0,122,255,0.2);
+    transition: all 0.2s ease;
+    letter-spacing: -0.01em;
+}
+.stButton button:hover {
+    box-shadow: 0 4px 16px rgba(0,122,255,0.3);
+    transform: translateY(-1px); background: #0070e9;
+}
+
+/* ── Navigation pills ── */
+.nav-strip {
+    display: flex; flex-wrap: wrap; gap: 0.35rem;
+    padding: 0.5rem 0; margin-bottom: 0.5rem;
+}
+.nav-pill {
+    display: inline-flex; align-items: center;
+    padding: 0.35rem 0.85rem; font-size: 0.75rem; font-weight: 520;
+    color: var(--text-secondary); background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border: 0.5px solid var(--border); border-radius: 100px;
+    text-decoration: none; transition: all 0.2s ease;
+    letter-spacing: -0.01em;
+}
+.nav-pill:hover {
+    color: var(--accent); border-color: rgba(0,122,255,0.3);
+    background: rgba(255,255,255,0.95); box-shadow: var(--shadow-md);
+}
+
+/* ── Parameter chips ── */
 .param-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem;
+    display: flex; flex-wrap: wrap; gap: 0.4rem;
     margin: 0.5rem 0 0 0;
 }
 .param-chip {
-    display: inline-block;
-    padding: 0.25rem 0.65rem;
-    font-size: 0.78rem;
-    font-weight: 500;
-    color: #1D1D1F;
-    background: #FFFFFF;
-    border: 0.5px solid #E5E5EA;
-    border-radius: 20px;
-    white-space: nowrap;
-    transition: border-color 0.15s ease;
+    display: inline-flex; align-items: center;
+    padding: 0.35rem 0.8rem; font-size: 0.75rem; font-weight: 520;
+    color: var(--text); background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+    border: 0.5px solid var(--border-strong); border-radius: 100px;
+    letter-spacing: -0.01em;
 }
-.param-chip:hover { border-color: #AEAEB2; }
 
-/* === Product Nav Strip === */
-.nav-strip {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.3rem;
-    margin: 0.25rem 0 0.25rem 0;
+/* ── Dividers ── */
+hr { border: none; border-top: 0.5px solid var(--border); margin: 1.25rem 0; }
+
+/* ── Captions ── */
+.stCaption { color: var(--muted) !important; font-size: 0.75rem !important; font-weight: 450 !important; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 100px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.2); }
+
+/* ── Toolbar ── */
+[data-testid="stToolbar"] { opacity: 0.25; transition: opacity 0.2s; }
+[data-testid="stToolbar"]:hover { opacity: 0.7; }
+[data-testid="stDeployButton"] { opacity: 0.35; transition: opacity 0.2s; }
+[data-testid="stDeployButton"]:hover { opacity: 0.9; }
+
+/* ── Info/Notifications ── */
+[data-testid="stNotification"] {
+    border-radius: var(--radius-sm); font-size: 0.82rem; line-height: 1.5;
+    border: 0.5px solid var(--border); background: rgba(255,255,255,0.75);
 }
-.nav-pill {
-    display: inline-block;
-    padding: 0.2rem 0.6rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: #6E6E73;
-    background: #FFFFFF;
-    border: 0.5px solid #E5E5EA;
-    border-radius: 14px;
-    text-decoration: none;
-    transition: all 0.15s ease;
-}
-.nav-pill:hover {
-    color: #1D1D1F;
-    border-color: #AEAEB2;
-    background: #F5F5F7;
-}
+
+/* ── Spacing refinements ── */
+.stAlert { margin: 0.5rem 0; border-radius: var(--radius-sm) !important; }
+.row-widget { gap: 0.75rem; }
 
 </style>
 ''', unsafe_allow_html=True)
@@ -332,6 +315,8 @@ NAV = {
         'table_am92sel': 'AM92 Select',
         'table_am92sel_plusone': 'AM92 Select+1',
         'sidebar_brand': '精算计算器',
+        'reinsurance': '再保险',
+        'stress_testing': '压力测试',
     },
     'en': {
         'home': 'Home',
@@ -353,6 +338,8 @@ NAV = {
         'table_am92sel': 'AM92 Select',
         'table_am92sel_plusone': 'AM92 Select+1',
         'sidebar_brand': 'Actuarial Calc',
+        'reinsurance': 'Reinsurance',
+        'stress_testing': 'Stress Test',
     },
     'zh-Hant': {
         'home': '首頁',
@@ -374,6 +361,8 @@ NAV = {
         'table_am92sel': 'AM92 Select',
         'table_am92sel_plusone': 'AM92 Select+1',
         'sidebar_brand': '精算計算器',
+        'reinsurance': '再保險',
+        'stress_testing': '壓力測試',
     },
 }
 
@@ -424,6 +413,8 @@ pages = [
     st.Page('pages/9_Fraud_Detection.py', title=L['fraud'], url_path='Fraud_Detection'),
     st.Page('pages/10_Pricing_Optimizer.py', title=L['pricing'], url_path='Pricing_Optimizer'),
     st.Page('pages/11_AI_Chat.py', title=L['chat'], url_path='AI_Chat'),
+    st.Page('pages/12_Stress_Testing.py', title=L['stress_testing'], url_path='Stress_Testing'),
+    st.Page('pages/13_Reinsurance.py', title=L['reinsurance'], url_path='Reinsurance'),
 ]
 
 pg = st.navigation(pages)
