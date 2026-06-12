@@ -405,4 +405,5 @@ with st.container(border=True):
     st.line_chart(df_r, height=300)
 
 st.divider()
+
 st.caption(t('footer', age=age, gender=gender, defer=defer, start=start_age, sum=sum_insured, rate=rate))

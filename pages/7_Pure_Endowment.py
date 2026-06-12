@@ -266,4 +266,5 @@ with st.container(border=True):
         st.caption(t('caption_prob', maturity=maturity_age, prob=f'{maturity_prob:.1%}'))
 
 st.divider()
+
 st.caption(t('footer', age=age, gender=gender, defer=defer, maturity=maturity_age, sum=sum_insured, rate=rate))

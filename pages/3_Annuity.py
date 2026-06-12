@@ -249,4 +249,5 @@ with st.container(border=True):
     st.line_chart(df_s, height=250)
 
 st.divider()
+
 st.caption(t('footer', age=age, gender=gender, sum=annual_payment, term=term, rate=rate))

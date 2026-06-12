@@ -366,4 +366,22 @@ with st.container(border=True):
     st.dataframe(df_d, width='stretch', hide_index=True, height=400)
 
 st.divider()
+
+# ── Download Report ──
+from report_utils import product_report_html
+_report_vars = [gap, payment]
+if all(v is not None for v in _report_vars):
+    report_html = product_report_html(
+        title=t('title'),
+        params={
+            t('age'): age, t('gender'): gender, t('sum'): f"¥{sum_insured:,}",
+            t('rate'): f"{rate:.1%}",
+        },
+        metrics=[(t('net_premium'), f"¥{net:,.2f}"), (t('gross_annual'), f"¥{gap:,.2f}"), (t('per_payment'), f"¥{payment:,.2f}")],
+        reserves=reserves if 'reserves' in dir() else None,
+    )
+    st.download_button("📥 下载报告 (HTML)", data=report_html,
+                       file_name="4_Endowment_{{age}}_{{gender}}.html",
+                       mime="text/html")
+
 st.caption(t('footer', age=age, gender=gender, sum=sum_insured, term=term, rate=rate, risk=risk_label_display, payment=pay_label))

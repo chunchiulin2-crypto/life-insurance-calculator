@@ -455,4 +455,25 @@ with st.container(border=True):
     st.dataframe(df_d, width='stretch', hide_index=True, height=400)
 
 st.divider()
+
+# ── PDF Download ──
+from report_utils import product_report_html
+report_html = product_report_html(
+    title=t('title'),
+    params={
+        t('age'): age, t('gender'): gender, t('sum'): f"¥{sum_insured:,}",
+        t('term'): f"{term}年", t('rate'): f"{rate:.1%}",
+        t('risk_label'): risk_label_display, t('payment_label'): pay_label,
+    },
+    metrics=[
+        (t('net_premium'), f"¥{gap:,.2f}"),
+        (t('gross_annual'), f"¥{gap:,.2f}"),
+        (t('per_payment'), f"¥{payment:,.2f}"),
+    ],
+    reserves=reserves,
+)
+st.download_button("📥 下载报告 (HTML)", data=report_html,
+                   file_name=f"term_life_{age}_{gender}.html",
+                   mime="text/html")
+
 st.caption(t('footer', age=age, gender=gender, sum=sum_insured, term=term, rate=rate, risk=risk_label_display, payment=pay_label))

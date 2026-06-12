@@ -268,4 +268,5 @@ with st.container(border=True):
     st.bar_chart(timeline_data.set_index('Year')['Cash Flow'], height=250)
 
 st.divider()
+
 st.caption(t('footer', age=age, gender=gender, defer=defer, retire=retire_age, pay=annual_payment, rate=rate))
